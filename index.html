@@ -2,286 +2,441 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>보스의 애니 자막 에디터 - PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema Editor | SF Edition</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Malgun Gothic', sans-serif; text-align: center; margin: 0; padding: 20px; }
-        h1 { color: #ff5e5e; }
-        .editor-container { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-bottom: 50px; }
-        
-        /* 씬(Scene) 블록 디자인 */
-        .scene-block { display: flex; flex-direction: row; flex-wrap: wrap; gap: 20px; background: #1e1e1e; padding: 20px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 1200px; justify-content: center; }
-        .canvas-area { width: 800px; max-width: 100%; }
-        canvas { width: 100%; height: auto; background: #000; border-radius: 4px; border: 1px solid #444; }
-        
-        /* 컨트롤 패널 디자인 */
-        .controls { display: flex; flex-direction: column; gap: 15px; width: 320px; text-align: left; background: #252525; padding: 20px; border-radius: 8px; }
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        .control-group label { font-size: 13px; font-weight: bold; color: #aaa; }
-        .row-group { display: flex; gap: 15px; justify-content: space-between; }
-        .row-group > div { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        
-        /* 인풋 및 버튼 디자인 */
-        input[type="range"] { width: 100%; cursor: pointer; accent-color: #ff5e5e; }
-        input[type="file"] { font-size: 14px; padding: 5px; background: #333; border-radius: 4px; color: white; cursor: pointer; }
-        textarea { width: 100%; height: 60px; padding: 10px; background: #333; color: white; border: 1px solid #444; border-radius: 4px; resize: none; font-family: 'Gulim', sans-serif; box-sizing: border-box; }
-        
-        .btn { background-color: #ff5e5e; color: white; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-        .btn:hover { background-color: #ff3333; transform: translateY(-2px); }
-        .btn-add { background-color: #4CAF50; margin-bottom: 20px; }
-        .btn-add:hover { background-color: #45a049; }
-        .btn-remove { background-color: transparent; color: #ff5e5e; border: 1px solid #ff5e5e; padding: 5px 10px; font-size: 12px; margin-top: 10px; }
-        .btn-remove:hover { background-color: #ff5e5e; color: black; }
-        
-        /* 체크박스 디자인 */
-        .checkbox-group { display: flex; gap: 15px; align-items: center; margin-top: 5px; }
-        .checkbox-group label { flex-direction: row; display: flex; align-items: center; gap: 5px; font-size: 14px; color: white; cursor: pointer;}
+        :root {
+            --bg-color: #050505;
+            --panel-color: #111111;
+            --accent-cyan: #00f3ff;
+            --accent-pink: #ff0055;
+            --border-color: #222222;
+            --text-main: #e0e0e0;
+            --text-dim: #888888;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* SF 배경 격자 무늬 */
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--accent-cyan), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        /* Scene Block - Glassmorphism 적용 */
+        .scene-card {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            background: rgba(17, 17, 17, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 1100px) {
+            .scene-card { grid-template-columns: 1fr; }
+        }
+
+        .canvas-wrap {
+            position: relative;
+            cursor: move;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        canvas {
+            width: 100%;
+            display: block;
+            background: #000;
+        }
+
+        /* SF 테마 컨트롤 패널 */
+        .panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .panel-section {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .label-row span.val { color: var(--accent-cyan); }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-cyan);
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px dashed var(--text-dim);
+            color: var(--text-main);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            padding: 12px;
+            font-family: 'Gulim', sans-serif;
+            resize: none;
+            box-sizing: border-box;
+        }
+
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        input[type="color"] {
+            border: none;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        .btn-add {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-export {
+            background: var(--accent-cyan);
+        }
+
+        .btn-remove {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: var(--accent-pink);
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .info-msg {
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            margin-bottom: 5px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🎬 보스의 영화/애니 자막 에디터 [PRO]</h1>
+    <h1>Cinema Editor</h1>
     
-    <div id="workspace" class="editor-container">
-        </div>
+    <div id="workspace" class="workspace"></div>
 
-    <div>
-        <button class="btn btn-add" id="addSceneBtn">+ 새로운 컷(Scene) 이어붙이기</button>
-        <br>
-        <button class="btn" id="exportAllBtn">💾 전체 이미지 병합 다운로드</button>
+    <div class="btn-group">
+        <button class="btn btn-add" id="addScene">＋ Add Scene</button>
+        <button class="btn btn-export" id="exportAll">💾 Render & Export</button>
     </div>
 
     <script>
         const workspace = document.getElementById('workspace');
         let sceneCounter = 0;
-        const sceneStates = {}; // 각 씬의 데이터를 저장하는 중앙 통제소
+        const scenes = {};
 
-        // 초기 첫 번째 씬 생성
-        createSceneBlock();
+        // 초기 생성
+        createScene();
 
-        document.getElementById('addSceneBtn').addEventListener('click', createSceneBlock);
-        document.getElementById('exportAllBtn').addEventListener('click', exportMergedImage);
+        document.getElementById('addScene').addEventListener('click', createScene);
+        document.getElementById('exportAll').addEventListener('click', exportImages);
 
-        // 1. 새로운 씬을 생성하고 HTML을 조립하는 함수
-        function createSceneBlock() {
+        function createScene() {
             const id = sceneCounter++;
-            
-            // 각 씬의 기본 상태값 뼈대 설정
-            sceneStates[id] = {
+            scenes[id] = {
                 img: null,
-                x: 0,
-                y: 0,
-                scale: 1,
-                rotate: 0,
-                text: '자막을 입력하십시오.',
-                fontSize: 36,
-                bold: false,
-                italic: false
+                imgX: 0, imgY: 0, scale: 1, rotate: 0,
+                text: "자막을 입력하십시오.",
+                textX: 0, textY: 0, // 0 = 하단 기준점
+                fontSize: 40,
+                color: "#ffffff",
+                bold: true, italic: false,
+                isDraggingImg: false,
+                isDraggingText: false
             };
 
-            const block = document.createElement('div');
-            block.className = 'scene-block';
-            block.id = `scene-${id}`;
-
-            block.innerHTML = `
-                <div class="canvas-area">
-                    <canvas id="canvas-${id}" width="800" height="450"></canvas>
+            const card = document.createElement('div');
+            card.className = 'scene-card';
+            card.id = `card-${id}`;
+            card.innerHTML = `
+                <button class="btn-remove" onclick="deleteScene(${id})">×</button>
+                <div class="canvas-wrap" id="wrap-${id}">
+                    <div class="info-msg">이미지나 자막을 마우스로 직접 잡고 움직이십시오.</div>
+                    <canvas id="canvas-${id}" width="1280" height="720"></canvas>
                 </div>
-                <div class="controls">
-                    <div class="control-group">
-                        <label>배경 이미지 업로드</label>
-                        <input type="file" id="upload-${id}" accept="image/*">
+                <div class="panel">
+                    <div class="panel-section">
+                        <div class="label-row">Background Image</div>
+                        <input type="file" id="file-${id}" accept="image/*">
+                        <input type="range" id="scale-${id}" min="0.1" max="5" step="0.01" value="1">
+                        <div class="label-row">Rotation <span class="val" id="rot-val-${id}">0°</span></div>
+                        <input type="range" id="rotate-${id}" min="-180" max="180" value="0">
                     </div>
-                    
-                    <div class="row-group">
-                        <div>
-                            <label>확대/축소</label>
-                            <input type="range" id="scale-${id}" min="0.1" max="3" step="0.01" value="1">
-                        </div>
-                        <div>
-                            <label>회전 (도)</label>
-                            <input type="range" id="rotate-${id}" min="-180" max="180" step="1" value="0">
-                        </div>
-                    </div>
-                    
-                    <div class="row-group">
-                        <div>
-                            <label>좌우 이동 (X)</label>
-                            <input type="range" id="x-${id}" min="-800" max="800" step="1" value="0">
-                        </div>
-                        <div>
-                            <label>상하 이동 (Y)</label>
-                            <input type="range" id="y-${id}" min="-450" max="450" step="1" value="0">
-                        </div>
-                    </div>
-                    
-                    <hr style="border-color: #444; margin: 10px 0; width: 100%;">
-                    
-                    <div class="control-group">
-                        <label>자막 텍스트 (굴림체 고정)</label>
+                    <div class="panel-section">
+                        <div class="label-row">Subtitle Config</div>
                         <textarea id="text-${id}">자막을 입력하십시오.</textarea>
+                        <div class="label-row">Font Size <span class="val" id="size-val-${id}">40px</span></div>
+                        <input type="range" id="size-${id}" min="10" max="150" value="40">
+                        <div class="color-picker-wrap">
+                            <input type="color" id="color-${id}" value="#ffffff">
+                            <span style="font-size:0.8rem; font-weight:700;">TEXT COLOR WHEEL</span>
+                        </div>
                     </div>
-                    
-                    <div class="control-group">
-                        <label>자막 크기</label>
-                        <input type="range" id="fontSize-${id}" min="10" max="100" step="1" value="36">
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <label><input type="checkbox" id="bold-${id}"> <b>볼드체 (Bold)</b></label>
-                        <label><input type="checkbox" id="italic-${id}"> <i>이탤릭체 (Italic)</i></label>
-                    </div>
-                    
-                    ${id > 0 ? `<button class="btn-remove" onclick="removeScene(${id})">X 이 컷 삭제하기</button>` : ''}
                 </div>
             `;
-            
-            workspace.appendChild(block);
-            attachListeners(id);
-            renderCanvas(id); // 빈 캔버스 초기화 (블랙박스 랜더링)
+            workspace.appendChild(card);
+            initEvents(id);
+            draw(id);
         }
 
-        // 2. 컨트롤 패널 조작 시 캔버스 즉각 반영 로직
-        function attachListeners(id) {
-            const state = sceneStates[id];
-            
-            document.getElementById(`upload-${id}`).addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+        function initEvents(id) {
+            const s = scenes[id];
+            const canvas = document.getElementById(`canvas-${id}`);
+            const wrap = document.getElementById(`wrap-${id}`);
+
+            // 파일 업로드
+            document.getElementById(`file-${id}`).addEventListener('change', e => {
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = event => {
                     const img = new Image();
-                    img.onload = () => {
-                        state.img = img;
-                        // X,Y,Scale 기본값 리셋
-                        state.scale = 1; state.x = 0; state.y = 0; state.rotate = 0;
-                        document.getElementById(`scale-${id}`).value = 1;
-                        document.getElementById(`rotate-${id}`).value = 0;
-                        document.getElementById(`x-${id}`).value = 0;
-                        document.getElementById(`y-${id}`).value = 0;
-                        renderCanvas(id);
-                    }
+                    img.onload = () => { s.img = img; draw(id); };
                     img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
+                };
+                reader.readAsDataURL(e.target.files[0]);
             });
 
-            // 슬라이더 및 텍스트 리스너
-            const updateState = (key, parseFunc) => (e) => {
-                state[key] = parseFunc ? parseFunc(e.target.value) : e.target.value;
-                renderCanvas(id);
+            // 입력 제어
+            document.getElementById(`scale-${id}`).oninput = e => { s.scale = parseFloat(e.target.value); draw(id); };
+            document.getElementById(`rotate-${id}`).oninput = e => { 
+                s.rotate = parseInt(e.target.value); 
+                document.getElementById(`rot-val-${id}`).innerText = s.rotate + "°";
+                draw(id); 
+            };
+            document.getElementById(`size-${id}`).oninput = e => { 
+                s.fontSize = parseInt(e.target.value); 
+                document.getElementById(`size-val-${id}`).innerText = s.fontSize + "px";
+                draw(id); 
+            };
+            document.getElementById(`text-${id}`).oninput = e => { s.text = e.target.value; draw(id); };
+            document.getElementById(`color-${id}`).onchange = e => { s.color = e.target.value; draw(id); };
+
+            // 🖱️ 캔버스 자유 드래그 엔진
+            let startX, startY;
+
+            wrap.onmousedown = e => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+                
+                startX = mouseX;
+                startY = mouseY;
+
+                // 자막 위치인지 확인 (단순 거리 계산)
+                const textBaseY = canvas.height - 100 + s.textY;
+                if (Math.abs(mouseY - textBaseY) < 100) {
+                    s.isDraggingText = true;
+                } else {
+                    s.isDraggingImg = true;
+                }
             };
 
-            document.getElementById(`scale-${id}`).addEventListener('input', updateState('scale', parseFloat));
-            document.getElementById(`rotate-${id}`).addEventListener('input', updateState('rotate', parseInt));
-            document.getElementById(`x-${id}`).addEventListener('input', updateState('x', parseInt));
-            document.getElementById(`y-${id}`).addEventListener('input', updateState('y', parseInt));
-            document.getElementById(`fontSize-${id}`).addEventListener('input', updateState('fontSize', parseInt));
-            document.getElementById(`text-${id}`).addEventListener('input', updateState('text', null));
-            
-            document.getElementById(`bold-${id}`).addEventListener('change', (e) => { state.bold = e.target.checked; renderCanvas(id); });
-            document.getElementById(`italic-${id}`).addEventListener('change', (e) => { state.italic = e.target.checked; renderCanvas(id); });
+            window.onmousemove = e => {
+                if (!s.isDraggingImg && !s.isDraggingText) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+                const dx = mouseX - startX;
+                const dy = mouseY - startY;
+
+                if (s.isDraggingImg) {
+                    s.imgX += dx;
+                    s.imgY += dy;
+                } else if (s.isDraggingText) {
+                    s.textX += dx;
+                    s.textY += dy;
+                }
+
+                startX = mouseX;
+                startY = mouseY;
+                draw(id);
+            };
+
+            window.onmouseup = () => {
+                s.isDraggingImg = false;
+                s.isDraggingText = false;
+            };
         }
 
-        // 3. 단일 캔버스 렌더링 (가장 핵심적인 그리기 로직)
-        function renderCanvas(id) {
-            const state = sceneStates[id];
+        function draw(id) {
+            const s = scenes[id];
             const canvas = document.getElementById(`canvas-${id}`);
-            if(!canvas) return;
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const w = canvas.width;  // 800
-            const h = canvas.height; // 450 (16:9 비율)
+            const w = canvas.width;
+            const h = canvas.height;
 
-            // 전체 캔버스를 검정색으로 초기화
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = "#000";
             ctx.fillRect(0, 0, w, h);
 
-            // 이미지 배치 및 변형 적용
-            if (state.img) {
+            if (s.img) {
                 ctx.save();
-                // 캔버스 중앙으로 기준점 이동
-                ctx.translate(w / 2 + state.x, h / 2 + state.y);
-                ctx.rotate(state.rotate * Math.PI / 180);
-                
-                // 이미지가 16:9 비율을 덮도록 기본 스케일 계산 (Cover)
-                const baseScale = Math.max(w / state.img.width, h / state.img.height);
-                const finalScale = baseScale * state.scale;
-                
-                ctx.scale(finalScale, finalScale);
-                // 이미지를 중앙 기준으로 그림
-                ctx.drawImage(state.img, -state.img.width / 2, -state.img.height / 2);
+                ctx.translate(w / 2 + s.imgX, h / 2 + s.imgY);
+                ctx.rotate(s.rotate * Math.PI / 180);
+                const ratio = Math.max(w / s.img.width, h / s.img.height);
+                ctx.scale(ratio * s.scale, ratio * s.scale);
+                ctx.drawImage(s.img, -s.img.width / 2, -s.img.height / 2);
                 ctx.restore();
             }
 
-            // 위아래 블랙박스 (레터박스) 덧그리기 (높이의 12%)
-            const barHeight = h * 0.12;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, w, barHeight); // 상단
-            ctx.fillRect(0, h - barHeight, w, barHeight); // 하단
+            // 시네마틱 레터박스 (위아래 12%)
+            const lh = h * 0.12;
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, w, lh);
+            ctx.fillRect(0, h - lh, w, lh);
 
-            // 자막 텍스트 렌더링
-            if (state.text.trim() !== '') {
-                // 요구하신 굴림체, 볼드, 이탤릭 조합 설정
-                const fontStyle = `${state.italic ? 'italic ' : ''}${state.bold ? 'bold ' : ''}${state.fontSize}px 'Gulim', 굴림, sans-serif`;
+            // 자막 렌더링
+            if (s.text) {
+                const fontStyle = `${s.italic ? 'italic ' : ''}${s.bold ? 'bold ' : ''}${s.fontSize}px 'Gulim', sans-serif`;
                 ctx.font = fontStyle;
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
+                ctx.textBaseline = 'middle';
+                ctx.letterSpacing = "-3px"; // 자간 -75 근사치
+
+                const lines = s.text.split('\n');
+                const lineH = s.fontSize * 1.2;
                 
-                // 요구하신 '자간 -75'를 캔버스 규격(LetterSpacing)에 맞게 조정
-                ctx.letterSpacing = "-2px"; 
+                // 위치 계산 (X축도 자유 이동)
+                const centerX = w / 2 + s.textX;
+                const startY = h - (h * 0.08) + s.textY - ((lines.length - 1) * lineH);
 
-                // 줄바꿈 대응 로직
-                const lines = state.text.split('\n');
-                const lineHeight = state.fontSize * 1.3;
-                // 가장 아랫줄이 캔버스 하단에서 6% 떨어진 곳에 위치하도록 설정
-                const startY = h - (h * 0.06) - ((lines.length - 1) * lineHeight);
-
-                lines.forEach((line, index) => {
-                    const textY = startY + (index * lineHeight);
-                    
-                    // 두꺼운 검은 테두리
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = state.fontSize * 0.15;
-                    ctx.lineJoin = 'round';
-                    ctx.strokeText(line, w / 2, textY);
-                    
-                    // 내부 흰색 글씨
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillText(line, w / 2, textY);
+                lines.forEach((line, i) => {
+                    const py = startY + (i * lineH);
+                    // 그림자 효과
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = s.fontSize * 0.15;
+                    ctx.lineJoin = "round";
+                    ctx.strokeText(line, centerX, py);
+                    // 메인 텍스트
+                    ctx.fillStyle = s.color;
+                    ctx.fillText(line, centerX, py);
                 });
             }
         }
 
-        // 4. 특정 씬 삭제
-        function removeScene(id) {
-            delete sceneStates[id];
-            const block = document.getElementById(`scene-${id}`);
-            if (block) block.remove();
+        function deleteScene(id) {
+            delete scenes[id];
+            document.getElementById(`card-${id}`).remove();
         }
 
-        // 5. 모든 캔버스를 세로로 이어붙여 다운로드
-        function exportMergedImage() {
-            const activeIds = Object.keys(sceneStates).sort((a,b) => a - b);
-            if(activeIds.length === 0) return;
+        function exportImages() {
+            const activeIds = Object.keys(scenes).sort((a,b) => a - b);
+            if (activeIds.length === 0) return;
 
-            // 마스터 캔버스 생성
-            const masterCanvas = document.createElement('canvas');
-            const blockWidth = 800;
-            const blockHeight = 450;
-            
-            masterCanvas.width = blockWidth;
-            masterCanvas.height = blockHeight * activeIds.length;
-            const masterCtx = masterCanvas.getContext('2d');
+            const master = document.createElement('canvas');
+            master.width = 1280;
+            master.height = 720 * activeIds.length;
+            const mctx = master.getContext('2d');
 
-            // 각 씬의 캔버스를 순서대로 복사하여 마스터에 붙여넣기
-            activeIds.forEach((id, index) => {
-                const sceneCanvas = document.getElementById(`canvas-${id}`);
-                masterCtx.drawImage(sceneCanvas, 0, index * blockHeight);
+            activeIds.forEach((id, i) => {
+                mctx.drawImage(document.getElementById(`canvas-${id}`), 0, i * 720);
             });
 
-            // 다운로드 트리거
             const link = document.createElement('a');
-            link.download = 'boss_cinematic_cut.png';
-            link.href = masterCanvas.toDataURL('image/png');
+            link.download = 'Cinema_Editor_Render.png';
+            link.href = master.toDataURL('image/png');
             link.click();
         }
     </script>
