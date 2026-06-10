@@ -4,1169 +4,681 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCH CINEMA EDITOR</title>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         @font-face {
             font-family: 'JoseonGulim';
             src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGu.woff') format('woff');
-            font-weight: normal;
-            font-display: swap;
+            font-weight: normal; font-display: swap;
         }
-
         :root {
-            --bg: #E8DFD0;
-            --bg-dark: #DDD4C4;
-            --panel: #D9D0C1;
-            --panel-inner: #E2DAC9;
-            --border: #B5AA98;
-            --border-light: #C8BFB0;
-            --accent: #8B7355;
-            --accent-gold: #C4A87C;
-            --text: #3C3428;
-            --text-muted: #8B7D6B;
-            --text-light: #A89E8E;
-            --danger: #9E4B4B;
-            --canvas-bg: #1a1815;
+            --bg:#E8DFD0;--bg2:#DDD4C4;--panel:#D9D0C1;--panel2:#E2DAC9;
+            --bdr:#B5AA98;--bdr-l:#C8BFB0;--acc:#8B7355;--acc-g:#C4A87C;
+            --tx:#3C3428;--tx-m:#8B7D6B;--tx-l:#A89E8E;--danger:#9E4B4B;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: "Pretendard Variable", Pretendard, sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ── NieR paper texture overlay ── */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--tx);font-family:"Pretendard Variable",Pretendard,sans-serif;min-height:100vh;overflow-x:hidden;}
+        body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
 
         /* ── Header ── */
-        .site-header {
-            text-align: center;
-            padding: 48px 20px 32px;
-            position: relative;
-        }
+        .site-header{text-align:center;padding:40px 20px 24px;}
+        .h-line{width:60px;height:1px;background:var(--acc);margin:0 auto 16px;}
+        .h-dia{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;}
+        .h-dia::before,.h-dia::after{content:'';width:36px;height:1px;background:var(--bdr);}
+        .dia{width:7px;height:7px;background:var(--acc);transform:rotate(45deg);flex-shrink:0;}
+        .site-title{font-family:'Noto Serif KR',serif;font-weight:300;font-size:1.5rem;letter-spacing:10px;text-transform:uppercase;}
+        .site-sub{font-size:.65rem;letter-spacing:4px;color:var(--tx-m);margin-top:6px;text-transform:uppercase;}
 
-        .header-line {
-            width: 60px;
-            height: 1px;
-            background: var(--accent);
-            margin: 0 auto 20px;
-        }
+        /* ── Top Mode Switch ── */
+        .mode-switch{display:flex;justify-content:center;gap:0;margin:20px auto 30px;max-width:400px;border:1px solid var(--bdr);}
+        .mode-btn{flex:1;padding:10px 0;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;background:var(--panel);color:var(--tx-m);border:none;font-family:inherit;transition:all .15s;}
+        .mode-btn.active{background:var(--acc);color:var(--bg);}
+        .mode-btn:not(:last-child){border-right:1px solid var(--bdr);}
 
-        .header-diamond {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
+        .mode-area{display:none;max-width:1440px;margin:0 auto;padding:0 20px 60px;}
+        .mode-area.active{display:block;}
 
-        .header-diamond::before,
-        .header-diamond::after {
-            content: '';
-            width: 40px;
-            height: 1px;
-            background: var(--border);
-        }
+        /* ══════════ SHARED UI ══════════ */
+        .section-head{display:flex;align-items:center;gap:8px;font-size:.63rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--tx-m);margin-bottom:4px;}
+        .section-head::after{content:'';flex:1;height:1px;background:var(--bdr-l);}
+        .ctrl{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+        .ctrl-label{display:flex;justify-content:space-between;font-size:.67rem;color:var(--tx-m);letter-spacing:1px;}
+        input[type="range"]{-webkit-appearance:none;width:100%;height:2px;background:var(--bdr);outline:none;}
+        input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--acc);border:2px solid var(--bg);border-radius:50%;cursor:pointer;}
+        input[type="text"],select,textarea{width:100%;padding:7px 10px;background:var(--panel2);border:1px solid var(--bdr-l);color:var(--tx);font-family:inherit;font-size:.78rem;outline:none;transition:border-color .15s;}
+        input[type="text"]:focus,select:focus,textarea:focus{border-color:var(--acc);}
+        textarea{height:68px;resize:none;}
+        select{cursor:pointer;}
+        input[type="file"]{font-size:.73rem;color:var(--tx-m);}
+        input[type="file"]::file-selector-button{background:var(--panel2);color:var(--tx);border:1px solid var(--bdr);padding:4px 12px;font-size:.7rem;cursor:pointer;font-family:inherit;letter-spacing:1px;margin-right:8px;transition:background .15s;}
+        input[type="file"]::file-selector-button:hover{background:var(--bdr-l);}
+        input[type="checkbox"]{accent-color:var(--acc);}
+        .check-row{display:flex;gap:12px;font-size:.76rem;flex-wrap:wrap;}
+        .check-row label{display:flex;align-items:center;gap:4px;cursor:pointer;}
+        .sep{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0;}
+        .sep::before,.sep::after{content:'';flex:1;height:1px;background:var(--bdr-l);}
 
-        .diamond {
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            transform: rotate(45deg);
-            flex-shrink: 0;
-        }
+        .btn{padding:10px 32px;font-family:'Noto Serif KR',serif;font-weight:500;font-size:.8rem;letter-spacing:3px;cursor:pointer;transition:all .2s;text-transform:uppercase;border:1px solid var(--bdr);background:var(--panel);color:var(--tx);}
+        .btn:hover{background:var(--acc);color:var(--bg);border-color:var(--acc);}
+        .btn-p{background:var(--acc);color:var(--bg);border-color:var(--acc);}
+        .btn-p:hover{background:var(--tx);border-color:var(--tx);}
+        .btn-sm{padding:5px 12px;font-size:.68rem;font-family:inherit;letter-spacing:1px;cursor:pointer;border:1px solid var(--bdr);background:var(--panel2);color:var(--tx);transition:all .15s;}
+        .btn-sm:hover{background:var(--bdr-l);}
 
-        .site-title {
-            font-family: 'Noto Serif KR', serif;
-            font-weight: 300;
-            font-size: 1.6rem;
-            letter-spacing: 12px;
-            text-transform: uppercase;
-            color: var(--text);
-        }
+        /* ══════════ SUBTITLE MODE ══════════ */
+        .sub-workspace{display:flex;flex-direction:column;gap:44px;}
+        .scene-card{display:grid;grid-template-columns:1fr 350px;background:var(--panel);border:1px solid var(--bdr);position:relative;overflow:hidden;}
+        .scene-card::before{content:'';position:absolute;inset:4px;border:1px solid var(--bdr-l);pointer-events:none;z-index:5;}
+        @media(max-width:1100px){.scene-card{grid-template-columns:1fr;}}
+        .scene-tag{position:absolute;top:10px;left:10px;font-family:'Noto Serif KR',serif;font-size:.6rem;letter-spacing:3px;color:var(--tx-m);text-transform:uppercase;z-index:10;background:var(--panel);padding:2px 7px;border:1px solid var(--bdr-l);}
+        .canvas-wrap{background:#1a1815;display:flex;align-items:center;justify-content:center;position:relative;cursor:grab;overflow:hidden;min-height:380px;}
+        .canvas-wrap:active{cursor:grabbing;}
+        .canvas-wrap canvas{width:100%;height:auto;display:block;}
+        .canvas-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:.6rem;letter-spacing:1px;color:rgba(255,255,255,.25);pointer-events:none;z-index:6;white-space:nowrap;}
+        .s-panel{padding:20px;border-left:1px solid var(--bdr);display:flex;flex-direction:column;gap:14px;max-height:680px;overflow-y:auto;background:var(--panel);}
+        .s-panel::-webkit-scrollbar{width:4px;}
+        .s-panel::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+        .sync-box{background:rgba(139,115,85,.1);border:1px solid rgba(139,115,85,.3);padding:7px 10px;font-size:.73rem;color:var(--acc);font-weight:600;display:flex;align-items:center;gap:5px;}
+        .locked-ui{opacity:.35;pointer-events:none;}
+        .btn-del-scene{position:absolute;top:10px;right:10px;z-index:10;background:var(--panel);border:1px solid var(--danger);color:var(--danger);padding:3px 9px;font-size:.6rem;font-family:inherit;letter-spacing:1px;cursor:pointer;}
+        .btn-del-scene:hover{background:var(--danger);color:#fff;}
+        .sub-footer{display:flex;justify-content:center;gap:14px;margin-top:30px;}
+        .color-pick{display:flex;align-items:center;gap:8px;}
+        .color-pick input[type="color"]{width:34px;height:22px;border:1px solid var(--bdr);background:var(--panel2);cursor:pointer;padding:1px;}
 
-        .site-subtitle {
-            font-size: 0.7rem;
-            letter-spacing: 4px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            text-transform: uppercase;
-        }
+        /* ══════════ COLLAGE MODE ══════════ */
+        .col-layout{display:grid;grid-template-columns:1fr 340px;gap:0;background:var(--panel);border:1px solid var(--bdr);position:relative;min-height:500px;}
+        .col-layout::before{content:'';position:absolute;inset:4px;border:1px solid var(--bdr-l);pointer-events:none;z-index:5;}
+        @media(max-width:1000px){.col-layout{grid-template-columns:1fr;}}
+        .col-preview{background:#1a1815;display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px;position:relative;}
+        .col-preview canvas{max-width:100%;max-height:600px;display:block;background:#000;}
+        .col-panel{padding:20px;border-left:1px solid var(--bdr);display:flex;flex-direction:column;gap:14px;max-height:700px;overflow-y:auto;}
+        .col-panel::-webkit-scrollbar{width:4px;}
+        .col-panel::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
 
-        /* ── Global Controls ── */
-        .global-bar {
-            max-width: 1440px;
-            margin: 0 auto 40px;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
+        /* image strip items */
+        .strip-list{display:flex;flex-direction:column;gap:3px;}
+        .strip-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--panel2);border:1px solid transparent;font-size:.73rem;cursor:pointer;transition:all .1s;}
+        .strip-item:hover{border-color:var(--bdr);}
+        .strip-item.active{border-color:var(--acc);background:rgba(139,115,85,.12);}
+        .strip-thumb{width:40px;height:28px;object-fit:cover;border:1px solid var(--bdr-l);flex-shrink:0;}
+        .strip-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .strip-item button{background:none;border:none;color:var(--tx-m);cursor:pointer;font-size:.68rem;padding:2px 4px;}
+        .strip-item button:hover{color:var(--danger);}
+        .strip-actions{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;}
 
-        .global-bar .g-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
+        /* filter presets */
+        .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+        .filter-chip{padding:6px 0;text-align:center;font-size:.68rem;letter-spacing:1px;cursor:pointer;border:1px solid var(--bdr-l);background:var(--panel2);color:var(--tx-m);transition:all .1s;}
+        .filter-chip:hover{border-color:var(--bdr);}
+        .filter-chip.active{border-color:var(--acc);color:var(--acc);background:rgba(139,115,85,.1);}
 
-        .global-bar input[type="color"] {
-            width: 32px;
-            height: 22px;
-            border: 1px solid var(--border);
-            background: var(--panel);
-            cursor: pointer;
-            border-radius: 2px;
-            padding: 1px;
-        }
+        .col-footer{display:flex;justify-content:center;gap:14px;margin-top:24px;}
 
-        /* ── Workspace ── */
-        .workspace {
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 0 24px 60px;
-            display: flex;
-            flex-direction: column;
-            gap: 48px;
-        }
+        .col-empty{text-align:center;color:var(--tx-l);font-size:.75rem;padding:40px 0;letter-spacing:1px;}
 
-        /* ── Scene Card (NieR panel style) ── */
-        .scene-card {
-            display: grid;
-            grid-template-columns: 1fr 360px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .scene-card::before {
-            content: '';
-            position: absolute;
-            inset: 4px;
-            border: 1px solid var(--border-light);
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        @media (max-width: 1100px) {
-            .scene-card { grid-template-columns: 1fr; }
-        }
-
-        /* scene number tag */
-        .scene-tag {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            font-family: 'Noto Serif KR', serif;
-            font-size: 0.65rem;
-            letter-spacing: 3px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            z-index: 10;
-            background: var(--panel);
-            padding: 2px 8px;
-            border: 1px solid var(--border-light);
-        }
-
-        /* ── Canvas Area ── */
-        .canvas-wrap {
-            background: var(--canvas-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: grab;
-            overflow: hidden;
-            min-height: 420px;
-        }
-        .canvas-wrap:active { cursor: grabbing; }
-        .canvas-wrap canvas { width: 100%; height: auto; display: block; }
-
-        .canvas-hint {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.65rem;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.3);
-            pointer-events: none;
-            z-index: 6;
-            white-space: nowrap;
-        }
-
-        /* ── Panel (Controls Sidebar) ── */
-        .panel {
-            padding: 24px;
-            border-left: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-height: 700px;
-            overflow-y: auto;
-            background: var(--panel);
-        }
-
-        .panel::-webkit-scrollbar { width: 4px; }
-        .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-        .panel::-webkit-scrollbar-track { background: transparent; }
-
-        /* ── Section Headers ── */
-        .section-head {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            margin-bottom: 2px;
-        }
-
-        .section-head::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border-light);
-        }
-
-        /* ── Form Controls ── */
-        .ctrl { display: flex; flex-direction: column; gap: 6px; }
-
-        .ctrl-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            letter-spacing: 1px;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 2px;
-            background: var(--border);
-            outline: none;
-            border-radius: 0;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
-            background: var(--accent);
-            border: 2px solid var(--bg);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        input[type="text"], select, textarea {
-            width: 100%;
-            padding: 8px 10px;
-            background: var(--panel-inner);
-            border: 1px solid var(--border-light);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 0.8rem;
-            outline: none;
-            transition: border-color 0.15s;
-        }
-        input[type="text"]:focus, select:focus, textarea:focus {
-            border-color: var(--accent);
-        }
-        textarea { height: 68px; resize: none; }
-        select { cursor: pointer; }
-
-        input[type="file"] {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        input[type="file"]::file-selector-button {
-            background: var(--panel-inner);
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 4px 12px;
-            font-size: 0.72rem;
-            cursor: pointer;
-            font-family: inherit;
-            letter-spacing: 1px;
-            margin-right: 8px;
-            transition: background 0.15s;
-        }
-        input[type="file"]::file-selector-button:hover {
-            background: var(--border-light);
-        }
-
-        .check-row {
-            display: flex;
-            gap: 14px;
-            font-size: 0.78rem;
-            flex-wrap: wrap;
-            color: var(--text);
-        }
-        .check-row label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-        }
-
-        input[type="checkbox"] {
-            accent-color: var(--accent);
-        }
-
-        .color-pick {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .color-pick input[type="color"] {
-            width: 36px;
-            height: 24px;
-            border: 1px solid var(--border);
-            background: var(--panel-inner);
-            cursor: pointer;
-            padding: 1px;
-        }
-
-        /* ── Sync Box ── */
-        .sync-box {
-            background: rgba(139, 115, 85, 0.1);
-            border: 1px solid rgba(139, 115, 85, 0.3);
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .locked-ui { opacity: 0.35; pointer-events: none; }
-
-        /* ── Layer List ── */
-        .layer-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .layer-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 8px;
-            background: var(--panel-inner);
-            border: 1px solid transparent;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.1s;
-        }
-        .layer-item:hover { border-color: var(--border); }
-        .layer-item.active {
-            border-color: var(--accent);
-            background: rgba(139, 115, 85, 0.12);
-        }
-
-        .layer-item .l-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        .layer-item button {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.7rem;
-            padding: 2px 4px;
-            line-height: 1;
-        }
-        .layer-item button:hover { color: var(--danger); }
-
-        .layer-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 4px;
-        }
-
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 0.7rem;
-            font-family: inherit;
-            letter-spacing: 1px;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            background: var(--panel-inner);
-            color: var(--text);
-            transition: all 0.15s;
-        }
-        .btn-sm:hover { background: var(--border-light); }
-
-        /* ── Separator ── */
-        .sep {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 4px 0;
-        }
-        .sep::before, .sep::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border-light);
-        }
-        .sep .diamond {
-            width: 5px;
-            height: 5px;
-        }
-
-        /* ── Footer Buttons ── */
-        .footer-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            padding: 0 24px 80px;
-            max-width: 1440px;
-            margin: 0 auto;
-        }
-
-        .btn {
-            padding: 12px 36px;
-            font-family: 'Noto Serif KR', serif;
-            font-weight: 500;
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            border: 1px solid var(--border);
-            background: var(--panel);
-            color: var(--text);
-        }
-        .btn:hover {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: var(--bg);
-            border-color: var(--accent);
-        }
-        .btn-primary:hover {
-            background: var(--text);
-            border-color: var(--text);
-        }
-
-        .btn-remove-scene {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            z-index: 10;
-            background: var(--panel);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 3px 10px;
-            font-size: 0.65rem;
-            font-family: inherit;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .btn-remove-scene:hover {
-            background: var(--danger);
-            color: #fff;
-        }
-
-        /* ── Mode Tabs ── */
-        .mode-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-light);
-            margin-bottom: 4px;
-        }
-        .mode-tab {
-            flex: 1;
-            padding: 7px 0;
-            text-align: center;
-            font-size: 0.65rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            color: var(--text-muted);
-            border-bottom: 2px solid transparent;
-            transition: all 0.15s;
-            background: none;
-            border-top: none;
-            border-left: none;
-            border-right: none;
-            font-family: inherit;
-        }
-        .mode-tab:hover { color: var(--text); }
-        .mode-tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: flex; flex-direction: column; gap: 16px; }
-
-        /* ── Opacity Slider for Layers ── */
-        .layer-opacity {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .layer-opacity input[type="range"] { flex: 1; }
-        .layer-opacity span { font-size: 0.68rem; color: var(--text-muted); width: 32px; text-align: right; }
-
+        /* per-image ctrl */
+        .img-ctrl{margin-top:8px;padding-top:8px;border-top:1px solid var(--bdr-l);display:flex;flex-direction:column;gap:8px;}
     </style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="site-header">
-        <div class="header-line"></div>
-        <div class="header-diamond">
-            <div class="diamond"></div>
-        </div>
-        <h1 class="site-title">Arch Cinema</h1>
-        <p class="site-subtitle">Scene Composition Editor</p>
-    </header>
+<header class="site-header">
+    <div class="h-line"></div>
+    <div class="h-dia"><div class="dia"></div></div>
+    <h1 class="site-title">Arch Cinema</h1>
+    <p class="site-sub">Scene Composition Editor</p>
+</header>
 
-    <!-- Global Bar -->
-    <div class="global-bar">
-        <div class="g-item">
-            <span>Point Color</span>
-            <input type="color" id="globalAccent" value="#8B7355">
+<!-- ── Mode Switch ── -->
+<div class="mode-switch">
+    <button class="mode-btn active" data-mode="subtitle">자막 모드</button>
+    <button class="mode-btn" data-mode="collage">콜라주 모드</button>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ═══  SUBTITLE MODE  ═══════════════ -->
+<!-- ══════════════════════════════════════ -->
+<div class="mode-area active" id="area-subtitle">
+    <div class="sub-workspace" id="subWorkspace"></div>
+    <div class="sub-footer">
+        <button class="btn" id="subAdd">＋ 컷 추가</button>
+        <button class="btn btn-p" id="subExportAll">전체 렌더링</button>
+        <button class="btn" id="subExportOne">마지막 컷 저장</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ═══  COLLAGE MODE  ═════════════════ -->
+<!-- ══════════════════════════════════════ -->
+<div class="mode-area" id="area-collage">
+    <div class="col-layout">
+        <div class="col-preview" id="colPreviewWrap">
+            <canvas id="colCanvas" width="1920" height="1080"></canvas>
         </div>
-        <div class="g-item">
-            <span>Canvas</span>
-            <select id="globalRatio" style="padding:3px 6px; background:var(--panel-inner); border:1px solid var(--border); color:var(--text); font-size:0.72rem; font-family:inherit;">
-                <option value="1920x1080">1920 × 1080</option>
-                <option value="1080x1080">1080 × 1080</option>
-                <option value="1080x1350">1080 × 1350</option>
-                <option value="1080x1920">1080 × 1920</option>
-            </select>
+        <div class="col-panel">
+
+            <div class="section-head">출력 설정</div>
+            <div class="ctrl">
+                <div class="ctrl-label"><span>최종 너비 (px)</span></div>
+                <input type="text" id="colOutW" value="1920" style="width:100px;">
+            </div>
+            <div class="ctrl">
+                <div class="ctrl-label"><span>이어붙이기 방향</span></div>
+                <select id="colDir">
+                    <option value="v">세로 (위→아래)</option>
+                    <option value="h">가로 (왼→오른)</option>
+                </select>
+            </div>
+            <div class="ctrl">
+                <div class="ctrl-label"><span>이미지 간 간격 (px)</span></div>
+                <input type="range" id="colGap" min="0" max="100" value="0">
+                <div class="ctrl-label"><span></span><span id="colGapVal">0px</span></div>
+            </div>
+            <div class="ctrl">
+                <div class="ctrl-label"><span>간격 색상</span></div>
+                <div class="color-pick">
+                    <input type="color" id="colGapColor" value="#000000">
+                </div>
+            </div>
+
+            <div class="sep"><div class="dia"></div></div>
+
+            <div class="section-head">이미지</div>
+            <input type="file" id="colFileAdd" accept="image/*" multiple>
+            <div class="strip-list" id="colStripList">
+                <div class="col-empty">이미지를 추가하세요</div>
+            </div>
+
+            <!-- Per-image controls (shown when item selected) -->
+            <div id="colImgCtrl" style="display:none;">
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">선택 이미지 설정</div>
+                <div class="ctrl">
+                    <div class="ctrl-label"><span>확대/축소</span><span id="ciScaleVal">100%</span></div>
+                    <input type="range" id="ciScale" min="10" max="500" value="100">
+                </div>
+                <div class="ctrl">
+                    <div class="ctrl-label"><span>회전</span><span id="ciRotVal">0°</span></div>
+                    <input type="range" id="ciRot" min="-180" max="180" value="0">
+                </div>
+                <div class="ctrl">
+                    <div class="ctrl-label"><span>X 오프셋</span></div>
+                    <input type="range" id="ciOX" min="-1000" max="1000" value="0">
+                </div>
+                <div class="ctrl">
+                    <div class="ctrl-label"><span>Y 오프셋</span></div>
+                    <input type="range" id="ciOY" min="-1000" max="1000" value="0">
+                </div>
+                <div class="strip-actions">
+                    <button class="btn-sm" onclick="COL.move(-1)">▲ 위로</button>
+                    <button class="btn-sm" onclick="COL.move(1)">▼ 아래로</button>
+                    <button class="btn-sm" onclick="COL.dup()">복제</button>
+                    <button class="btn-sm" onclick="COL.del()" style="color:var(--danger);">삭제</button>
+                </div>
+            </div>
+
+            <div class="sep"><div class="dia"></div></div>
+
+            <div class="section-head">필터</div>
+            <div class="filter-grid" id="colFilters">
+                <div class="filter-chip" data-f="none">없음</div>
+                <div class="filter-chip" data-f="grain">필름 그레인</div>
+                <div class="filter-chip" data-f="bw">흑백</div>
+                <div class="filter-chip" data-f="sepia">세피아</div>
+                <div class="filter-chip" data-f="warm">따뜻한 톤</div>
+                <div class="filter-chip" data-f="cool">차가운 톤</div>
+                <div class="filter-chip" data-f="vintage">빈티지</div>
+                <div class="filter-chip" data-f="highcon">고대비</div>
+            </div>
+
+            <div class="ctrl" style="margin-top:8px;">
+                <div class="ctrl-label"><span>그라데이션 오버레이</span></div>
+                <select id="colGrad">
+                    <option value="none">없음</option>
+                    <option value="tb-black">위→아래 블랙</option>
+                    <option value="bt-black">아래→위 블랙</option>
+                    <option value="lr-black">왼→오 블랙</option>
+                    <option value="tb-warm">위→아래 따뜻한</option>
+                    <option value="bt-warm">아래→위 따뜻한</option>
+                    <option value="tb-cool">위→아래 차가운</option>
+                    <option value="custom">커스텀</option>
+                </select>
+            </div>
+            <div id="colGradCustom" style="display:none;">
+                <div class="ctrl">
+                    <div class="color-pick"><span style="font-size:.67rem;">시작</span><input type="color" id="colGradC1" value="#000000"></div>
+                    <div class="color-pick" style="margin-top:4px;"><span style="font-size:.67rem;">끝</span><input type="color" id="colGradC2" value="#ffffff"></div>
+                </div>
+            </div>
+
+            <div class="ctrl" style="margin-top:6px;">
+                <div class="ctrl-label"><span>그라데이션 강도</span><span id="colGradAVal">40%</span></div>
+                <input type="range" id="colGradA" min="0" max="100" value="40">
+            </div>
+
         </div>
     </div>
 
-    <!-- Workspace -->
-    <div id="workspace" class="workspace"></div>
-
-    <!-- Footer -->
-    <div class="footer-actions">
-        <button class="btn" id="addScene">＋ 컷 추가</button>
-        <button class="btn btn-primary" id="exportAll">렌더링 저장</button>
-        <button class="btn" id="exportSingle">현재 컷만 저장</button>
+    <div class="col-footer">
+        <button class="btn btn-p" onclick="COL.exportImg()">렌더링 저장</button>
     </div>
+</div>
 
-    <script>
-    (() => {
-        const workspace = document.getElementById('workspace');
-        let sceneCounter = 0;
-        const scenes = {};
-        let globalAccent = "#8B7355";
-        let canvasW = 1920, canvasH = 1080;
+<script>
+(() => {
+    // ── Mode switch ──
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mode-area').forEach(a => a.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('area-' + btn.dataset.mode).classList.add('active');
+        });
+    });
 
-        // Film grain pre-render
-        const noiseCanvas = document.createElement('canvas');
-        noiseCanvas.width = 300; noiseCanvas.height = 300;
-        const nctx = noiseCanvas.getContext('2d');
-        const nImg = nctx.createImageData(300, 300);
-        for (let i = 0; i < nImg.data.length; i += 4) {
-            const v = Math.random() * 255;
-            nImg.data[i] = v; nImg.data[i+1] = v; nImg.data[i+2] = v;
-            nImg.data[i+3] = 18;
+    // ══════════════════════════════════
+    //  SUBTITLE MODE (기존 유지)
+    // ══════════════════════════════════
+    const subWS = document.getElementById('subWorkspace');
+    let sCnt = 0;
+    const sScenes = {};
+    let gAccent = "#8B7355";
+
+    // noise
+    const noiseC = document.createElement('canvas');
+    noiseC.width = 300; noiseC.height = 300;
+    const nc = noiseC.getContext('2d');
+    const nd = nc.createImageData(300,300);
+    for(let i=0;i<nd.data.length;i+=4){const v=Math.random()*255;nd.data[i]=v;nd.data[i+1]=v;nd.data[i+2]=v;nd.data[i+3]=18;}
+    nc.putImageData(nd,0,0);
+
+    createSubScene();
+    document.getElementById('subAdd').addEventListener('click', createSubScene);
+    document.getElementById('subExportAll').addEventListener('click', subExportAll);
+    document.getElementById('subExportOne').addEventListener('click', subExportOne);
+
+    function subRedrawAll(){Object.keys(sScenes).forEach(id=>subDraw(id));}
+
+    function createSubScene(){
+        const id=sCnt++;
+        sScenes[id]={img:null,imgX:0,imgY:0,scale:1,rotate:0,syncMaster:id!==0,movieTitle:'',text:id===0?'자막을 입력하십시오.':'',textY:0,fontFamily:'pretendard',fontSize:60,textColor:'#ffffff',isBold:false,isItalic:false,isOutline:true,logoStyle:'none',filmGrain:false,_drag:false};
+        const card=document.createElement('div');card.className='scene-card';card.id=`sc-${id}`;
+        const rm=id>0?`<button class="btn-del-scene" onclick="delSubScene(${id})">삭제</button>`:'';
+        const sync=id>0?`<div class="sync-box"><label><input type="checkbox" id="ssync-${id}" checked> 1번 컷 동기화</label></div>`:'';
+        card.innerHTML=`
+            <div class="scene-tag">Scene ${id+1}</div>${rm}
+            <div class="canvas-wrap" id="sw-${id}"><canvas id="sc-${id}-c" width="1920" height="1080"></canvas><div class="canvas-hint">드래그: 이동 · 휠: 확대/축소</div></div>
+            <div class="s-panel">
+                ${sync}
+                <div class="section-head">배경 이미지</div>
+                <div class="ctrl"><input type="file" id="sf-${id}" accept="image/*"></div>
+                <div class="ctrl"><div class="ctrl-label"><span>회전</span><span id="srot-v-${id}">0°</span></div><input type="range" id="srot-${id}" min="-180" max="180" value="0"></div>
+                <div class="check-row"><label><input type="checkbox" id="sgr-${id}"> 필름 그레인</label></div>
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">로고</div>
+                <div class="ctrl"><select id="slogo-${id}"><option value="none">없음</option><option value="ocn">ARCH (OCN)</option><option value="netflix">A 마크</option></select></div>
+                <div class="ctrl" id="ssg0-${id}"><div class="ctrl-label"><span>영화 제목</span></div><input type="text" id="stitle-${id}" placeholder="제목"></div>
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">자막</div>
+                <div class="ctrl"><textarea id="stx-${id}" placeholder="자막 입력">${sScenes[id].text}</textarea></div>
+                <div class="ctrl"><div class="ctrl-label"><span>세로 위치</span></div><input type="range" id="sty-${id}" min="-500" max="500" value="0"></div>
+                <div class="ctrl"><div class="ctrl-label"><span>크기</span><span id="ssz-v-${id}">60px</span></div><input type="range" id="ssz-${id}" min="20" max="200" value="60"></div>
+                <div class="ctrl" id="ssg1-${id}"><select id="sff-${id}"><option value="pretendard">프리텐다드</option><option value="chosun">조선 굴림체</option><option value="gulim">굴림체</option></select>
+                    <div class="check-row" style="margin-top:4px;"><label><input type="checkbox" id="sb-${id}"> 볼드</label><label><input type="checkbox" id="si-${id}"> 이탤릭</label><label><input type="checkbox" id="so-${id}" checked> 테두리</label></div>
+                </div>
+                <div class="ctrl" id="ssg2-${id}"><div class="color-pick"><span style="font-size:.67rem;">색상</span><input type="color" id="scol-${id}" value="#ffffff"></div></div>
+            </div>`;
+        subWS.appendChild(card);
+        initSubEvents(id);
+        toggleSubSync(id);
+        subDraw(id);
+    }
+
+    function toggleSubSync(id){if(id===0)return;const l=sScenes[id].syncMaster;['ssg0-','ssg1-','ssg2-'].forEach(p=>{const e=document.getElementById(p+id);if(e)e.classList.toggle('locked-ui',l);});}
+
+    function initSubEvents(id){
+        const s=sScenes[id], canvas=document.getElementById(`sc-${id}-c`), wrap=document.getElementById(`sw-${id}`);
+        const syncel=document.getElementById(`ssync-${id}`);
+        if(syncel)syncel.addEventListener('change',e=>{s.syncMaster=e.target.checked;toggleSubSync(id);subDraw(id);});
+        document.getElementById(`sf-${id}`).addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const img=new Image();img.onload=()=>{s.img=img;s.imgX=0;s.imgY=0;s.scale=1;s.rotate=0;document.getElementById(`srot-${id}`).value=0;subDraw(id);};img.src=ev.target.result;};r.readAsDataURL(f);});
+        document.getElementById(`srot-${id}`).oninput=e=>{s.rotate=+e.target.value;document.getElementById(`srot-v-${id}`).textContent=s.rotate+'°';subDraw(id);};
+        document.getElementById(`sgr-${id}`).onchange=e=>{s.filmGrain=e.target.checked;subDraw(id);};
+        document.getElementById(`slogo-${id}`).onchange=e=>{s.logoStyle=e.target.value;subRedrawAll();};
+        const su=()=>id===0?subRedrawAll():subDraw(id);
+        document.getElementById(`stitle-${id}`).oninput=e=>{s.movieTitle=e.target.value;su();};
+        document.getElementById(`stx-${id}`).oninput=e=>{s.text=e.target.value;subDraw(id);};
+        document.getElementById(`sty-${id}`).oninput=e=>{s.textY=+e.target.value;subDraw(id);};
+        document.getElementById(`ssz-${id}`).oninput=e=>{s.fontSize=+e.target.value;document.getElementById(`ssz-v-${id}`).textContent=s.fontSize+'px';subDraw(id);};
+        document.getElementById(`sff-${id}`).onchange=e=>{s.fontFamily=e.target.value;su();};
+        document.getElementById(`sb-${id}`).onchange=e=>{s.isBold=e.target.checked;su();};
+        document.getElementById(`si-${id}`).onchange=e=>{s.isItalic=e.target.checked;su();};
+        document.getElementById(`so-${id}`).onchange=e=>{s.isOutline=e.target.checked;su();};
+        document.getElementById(`scol-${id}`).onchange=e=>{s.textColor=e.target.value;su();};
+        let sx,sy;
+        wrap.addEventListener('mousedown',e=>{if(!s.img)return;s._drag=true;sx=e.clientX;sy=e.clientY;});
+        window.addEventListener('mousemove',e=>{if(!s._drag)return;const r=canvas.getBoundingClientRect();s.imgX+=(e.clientX-sx)*(1920/r.width);s.imgY+=(e.clientY-sy)*(1080/r.height);sx=e.clientX;sy=e.clientY;subDraw(id);});
+        window.addEventListener('mouseup',()=>{s._drag=false;});
+        wrap.addEventListener('wheel',e=>{e.preventDefault();if(!s.img)return;s.scale-=e.deltaY*.001;s.scale=Math.max(.1,Math.min(10,s.scale));subDraw(id);},{passive:false});
+    }
+
+    function subDraw(id){
+        const s=sScenes[id],canvas=document.getElementById(`sc-${id}-c`);if(!canvas)return;
+        const ctx=canvas.getContext('2d'),w=1920,h=1080;
+        let d={...s};
+        if(s.syncMaster&&id!==0&&sScenes[0]){d.movieTitle=sScenes[0].movieTitle;d.fontFamily=sScenes[0].fontFamily;d.textColor=sScenes[0].textColor;d.isBold=sScenes[0].isBold;d.isItalic=sScenes[0].isItalic;d.isOutline=sScenes[0].isOutline;}
+        ctx.fillStyle='#000';ctx.fillRect(0,0,w,h);
+        if(d.img){ctx.save();ctx.translate(w/2+d.imgX,h/2+d.imgY);ctx.rotate(d.rotate*Math.PI/180);const r=Math.max(w/d.img.width,h/d.img.height);ctx.scale(r*d.scale,r*d.scale);ctx.drawImage(d.img,-d.img.width/2,-d.img.height/2);ctx.restore();}
+        if(d.filmGrain){ctx.save();ctx.fillStyle=ctx.createPattern(noiseC,'repeat');ctx.fillRect(0,0,w,h);ctx.restore();}
+        const lh2=h*.12;ctx.fillStyle='#000';ctx.fillRect(0,0,w,lh2);ctx.fillRect(0,h-lh2,w,lh2);
+        if(d.logoStyle!=='none'){ctx.save();const ly=65;if(d.logoStyle==='ocn'){const lW=125,lH=40,lX=w-lW-50;if(d.movieTitle.trim()){ctx.fillStyle='#fff';ctx.font='bold 18px "Pretendard",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(d.movieTitle,lX+lW/2,ly-8);}ctx.fillStyle=gAccent;ctx.beginPath();ctx.roundRect(lX,ly,lW,lH,4);ctx.fill();ctx.fillStyle='#000';ctx.font='900 30px "Arial Black",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ARCH',lX+lW/2,ly+lH/2+2);}else if(d.logoStyle==='netflix'){const lX=w-70;if(d.movieTitle.trim()){ctx.fillStyle='#fff';ctx.font='bold 18px "Pretendard",sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText(d.movieTitle,lX,ly-8);}ctx.fillStyle='#E50914';ctx.font='italic 900 65px "Arial Black",sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=10;ctx.fillText('A',lX,ly-5);}ctx.restore();}
+        if(d.text){ctx.save();let face="'Pretendard',sans-serif";if(d.fontFamily==='chosun')face="'JoseonGulim',sans-serif";if(d.fontFamily==='gulim')face="'Gulim',굴림,sans-serif";ctx.font=`${d.isItalic?'italic ':''}${d.isBold?'bold ':''}${d.fontSize}px ${face}`;ctx.textAlign='center';ctx.textBaseline='middle';const lines=d.text.split('\n'),lineH=d.fontSize*1.3,startY=h-(h*.08)-d.textY-((lines.length-1)*lineH);lines.forEach((l,i)=>{const py=startY+i*lineH;if(d.isOutline){ctx.strokeStyle='#000';ctx.lineWidth=d.fontSize*.15;ctx.lineJoin='round';ctx.strokeText(l,w/2,py);}ctx.fillStyle=d.textColor;ctx.fillText(l,w/2,py);});ctx.restore();}
+    }
+
+    window.delSubScene=(id)=>{delete sScenes[id];const e=document.getElementById(`sc-${id}`);if(e)e.remove();};
+    function subExportAll(){const ids=Object.keys(sScenes).sort((a,b)=>a-b);if(!ids.length)return;const m=document.createElement('canvas');m.width=1920;m.height=1080*ids.length;const mc=m.getContext('2d');ids.forEach((id,i)=>{mc.drawImage(document.getElementById(`sc-${id}-c`),0,i*1080);});dlC(m,'ARCH_CINEMA_ALL.png');}
+    function subExportOne(){const ids=Object.keys(sScenes);if(!ids.length)return;dlC(document.getElementById(`sc-${ids[ids.length-1]}-c`),'ARCH_CINEMA_SCENE.png');}
+    function dlC(c,n){const a=document.createElement('a');a.download=n;a.href=c.toDataURL('image/png');a.click();}
+
+
+    // ══════════════════════════════════
+    //  COLLAGE MODE
+    // ══════════════════════════════════
+    const colCanvas = document.getElementById('colCanvas');
+    const colCtx = colCanvas.getContext('2d');
+    const colState = {
+        images: [],      // {img, name, scale:1, rotate:0, ox:0, oy:0, thumbUrl}
+        activeIdx: -1,
+        outW: 1920,
+        dir: 'v',
+        gap: 0,
+        gapColor: '#000000',
+        filter: 'none',
+        grad: 'none',
+        gradC1: '#000000',
+        gradC2: '#ffffff',
+        gradA: 0.4,
+    };
+
+    // refs
+    const $colFileAdd = document.getElementById('colFileAdd');
+    const $colStripList = document.getElementById('colStripList');
+    const $colImgCtrl = document.getElementById('colImgCtrl');
+
+    // output settings
+    document.getElementById('colOutW').addEventListener('change', e => { colState.outW = Math.max(100, parseInt(e.target.value) || 1920); colDraw(); });
+    document.getElementById('colDir').addEventListener('change', e => { colState.dir = e.target.value; colDraw(); });
+    document.getElementById('colGap').addEventListener('input', e => { colState.gap = +e.target.value; document.getElementById('colGapVal').textContent = e.target.value + 'px'; colDraw(); });
+    document.getElementById('colGapColor').addEventListener('input', e => { colState.gapColor = e.target.value; colDraw(); });
+
+    // file add
+    $colFileAdd.addEventListener('change', e => {
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = new Image();
+                img.onload = () => {
+                    colState.images.push({
+                        img, name: file.name.length > 20 ? file.name.slice(0, 17) + '…' : file.name,
+                        scale: 1, rotate: 0, ox: 0, oy: 0, thumbUrl: ev.target.result
+                    });
+                    colState.activeIdx = colState.images.length - 1;
+                    colRenderList();
+                    colDraw();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        e.target.value = '';
+    });
+
+    // per-image controls
+    document.getElementById('ciScale').oninput = e => { if (!curImg()) return; curImg().scale = +e.target.value / 100; document.getElementById('ciScaleVal').textContent = e.target.value + '%'; colDraw(); };
+    document.getElementById('ciRot').oninput = e => { if (!curImg()) return; curImg().rotate = +e.target.value; document.getElementById('ciRotVal').textContent = e.target.value + '°'; colDraw(); };
+    document.getElementById('ciOX').oninput = e => { if (!curImg()) return; curImg().ox = +e.target.value; colDraw(); };
+    document.getElementById('ciOY').oninput = e => { if (!curImg()) return; curImg().oy = +e.target.value; colDraw(); };
+
+    // filters
+    document.querySelectorAll('#colFilters .filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#colFilters .filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            colState.filter = chip.dataset.f;
+            colDraw();
+        });
+    });
+    document.querySelector('#colFilters .filter-chip[data-f="none"]').classList.add('active');
+
+    // gradient
+    document.getElementById('colGrad').addEventListener('change', e => {
+        colState.grad = e.target.value;
+        document.getElementById('colGradCustom').style.display = e.target.value === 'custom' ? 'block' : 'none';
+        colDraw();
+    });
+    document.getElementById('colGradC1').addEventListener('input', e => { colState.gradC1 = e.target.value; colDraw(); });
+    document.getElementById('colGradC2').addEventListener('input', e => { colState.gradC2 = e.target.value; colDraw(); });
+    document.getElementById('colGradA').addEventListener('input', e => { colState.gradA = +e.target.value / 100; document.getElementById('colGradAVal').textContent = e.target.value + '%'; colDraw(); });
+
+    function curImg() { return colState.images[colState.activeIdx] || null; }
+
+    function colRenderList() {
+        const s = colState;
+        if (!s.images.length) {
+            $colStripList.innerHTML = '<div class="col-empty">이미지를 추가하세요</div>';
+            $colImgCtrl.style.display = 'none';
+            return;
         }
-        nctx.putImageData(nImg, 0, 0);
+        $colStripList.innerHTML = '';
+        s.images.forEach((item, i) => {
+            const el = document.createElement('div');
+            el.className = 'strip-item' + (i === s.activeIdx ? ' active' : '');
+            el.innerHTML = `<img class="strip-thumb" src="${item.thumbUrl}" alt=""><span class="strip-name">${i + 1}. ${item.name}</span><button title="삭제" data-del="${i}">✕</button>`;
+            el.addEventListener('click', e => {
+                if (e.target.dataset.del !== undefined) { s.images.splice(+e.target.dataset.del, 1); if (s.activeIdx >= s.images.length) s.activeIdx = s.images.length - 1; colRenderList(); colDraw(); return; }
+                s.activeIdx = i; colRenderList(); colSyncCtrls();
+            });
+            $colStripList.appendChild(el);
+        });
+        $colImgCtrl.style.display = s.activeIdx >= 0 ? 'block' : 'none';
+        if (s.activeIdx >= 0) colSyncCtrls();
+    }
 
-        // ── Init ──
-        createScene();
+    function colSyncCtrls() {
+        const item = curImg(); if (!item) return;
+        document.getElementById('ciScale').value = Math.round(item.scale * 100);
+        document.getElementById('ciScaleVal').textContent = Math.round(item.scale * 100) + '%';
+        document.getElementById('ciRot').value = item.rotate;
+        document.getElementById('ciRotVal').textContent = item.rotate + '°';
+        document.getElementById('ciOX').value = item.ox;
+        document.getElementById('ciOY').value = item.oy;
+    }
 
-        document.getElementById('addScene').addEventListener('click', createScene);
-        document.getElementById('exportAll').addEventListener('click', exportAll);
-        document.getElementById('exportSingle').addEventListener('click', exportSingle);
+    // ── Collage Draw ──
+    function colDraw() {
+        const s = colState;
+        if (!s.images.length) {
+            colCanvas.width = 1920; colCanvas.height = 1080;
+            colCtx.fillStyle = '#000'; colCtx.fillRect(0, 0, 1920, 1080);
+            colCtx.fillStyle = '#333'; colCtx.font = '24px Pretendard'; colCtx.textAlign = 'center';
+            colCtx.fillText('이미지를 추가하세요', 960, 540);
+            return;
+        }
 
-        document.getElementById('globalAccent').addEventListener('input', e => {
-            globalAccent = e.target.value;
-            redrawAll();
+        const outW = s.outW;
+        const gap = s.gap;
+        const isV = s.dir === 'v';
+
+        // Calculate slots
+        // For vertical: each image fills outW, height = outW / aspect * scale
+        // For horizontal: we need a common row height. Use min height approach.
+        let slots = s.images.map(item => {
+            const iw = item.img.width, ih = item.img.height;
+            const aspect = iw / ih;
+            if (isV) {
+                const slotW = outW;
+                const slotH = Math.round(slotW / aspect);
+                return { w: slotW, h: slotH, item };
+            } else {
+                return { aspect, item };
+            }
         });
 
-        document.getElementById('globalRatio').addEventListener('change', e => {
-            const [w, h] = e.target.value.split('x').map(Number);
-            canvasW = w; canvasH = h;
-            Object.keys(scenes).forEach(id => {
-                const c = document.getElementById(`canvas-${id}`);
-                if (c) { c.width = canvasW; c.height = canvasH; }
-            });
-            redrawAll();
+        let totalW, totalH;
+
+        if (isV) {
+            totalW = outW;
+            totalH = slots.reduce((sum, sl) => sum + sl.h, 0) + gap * (slots.length - 1);
+        } else {
+            // horizontal: all images same height, width proportional
+            // target total width = outW, solve for row height
+            // sum(rowH * aspect_i) + gaps = outW => rowH = (outW - gaps) / sum(aspects)
+            const totalGap = gap * (slots.length - 1);
+            const sumAspect = slots.reduce((sum, sl) => sum + sl.aspect, 0);
+            const rowH = Math.round((outW - totalGap) / sumAspect);
+            slots = slots.map(sl => ({ w: Math.round(rowH * sl.aspect), h: rowH, item: sl.item }));
+            totalW = slots.reduce((sum, sl) => sum + sl.w, 0) + totalGap;
+            totalH = rowH;
+        }
+
+        colCanvas.width = totalW;
+        colCanvas.height = totalH;
+
+        // Gap bg
+        colCtx.fillStyle = s.gapColor;
+        colCtx.fillRect(0, 0, totalW, totalH);
+
+        // Draw each image into its slot
+        let cx = 0, cy = 0;
+        slots.forEach((sl, i) => {
+            const item = sl.item;
+            const slotW = sl.w, slotH = sl.h;
+
+            colCtx.save();
+            colCtx.beginPath();
+            colCtx.rect(cx, cy, slotW, slotH);
+            colCtx.clip();
+
+            const centerX = cx + slotW / 2 + item.ox;
+            const centerY = cy + slotH / 2 + item.oy;
+
+            colCtx.translate(centerX, centerY);
+            colCtx.rotate(item.rotate * Math.PI / 180);
+
+            // scale to cover slot
+            const coverRatio = Math.max(slotW / item.img.width, slotH / item.img.height) * item.scale;
+            colCtx.scale(coverRatio, coverRatio);
+            colCtx.drawImage(item.img, -item.img.width / 2, -item.img.height / 2);
+            colCtx.restore();
+
+            // active indicator
+            if (i === s.activeIdx) {
+                colCtx.save();
+                colCtx.strokeStyle = '#C4A87C';
+                colCtx.lineWidth = 3;
+                colCtx.setLineDash([8, 4]);
+                colCtx.strokeRect(cx + 2, cy + 2, slotW - 4, slotH - 4);
+                colCtx.restore();
+            }
+
+            if (isV) cy += slotH + gap;
+            else cx += slotW + gap;
         });
 
-        function redrawAll() { Object.keys(scenes).forEach(id => draw(id)); }
-
-        function createScene() {
-            const id = sceneCounter++;
-            scenes[id] = {
-                layers: [],          // collage layers: { img, x, y, scale, rotate, opacity, name }
-                activeLayer: -1,     // selected layer index
-                syncMaster: id !== 0,
-                movieTitle: "",
-                text: id === 0 ? "자막을 입력하십시오." : "",
-                textY: 0,
-                fontFamily: 'pretendard',
-                fontSize: 60,
-                textColor: "#ffffff",
-                isBold: false, isItalic: false, isOutline: true,
-                logoStyle: 'none',
-                filmGrain: false,
-                _dragging: false
-            };
-
-            const card = document.createElement('div');
-            card.className = 'scene-card';
-            card.id = `card-${id}`;
-
-            const removeBtn = id > 0 ? `<button class="btn-remove-scene" onclick="deleteScene(${id})">삭제</button>` : '';
-            const syncUI = id > 0 ? `
-                <div class="sync-box">
-                    <label><input type="checkbox" id="sync-${id}" checked> 1번 컷 스타일 동기화</label>
-                </div>` : '';
-
-            card.innerHTML = `
-                <div class="scene-tag">Scene ${id + 1}</div>
-                ${removeBtn}
-                <div class="canvas-wrap" id="wrap-${id}">
-                    <canvas id="canvas-${id}" width="${canvasW}" height="${canvasH}"></canvas>
-                    <div class="canvas-hint">드래그: 이동 · 휠: 확대/축소 · Shift+휠: 회전</div>
-                </div>
-                <div class="panel" id="panel-${id}">
-                    ${syncUI}
-
-                    <div class="mode-tabs">
-                        <button class="mode-tab active" data-tab="layers" data-id="${id}">레이어</button>
-                        <button class="mode-tab" data-tab="subtitle" data-id="${id}">자막</button>
-                        <button class="mode-tab" data-tab="style" data-id="${id}">스타일</button>
-                    </div>
-
-                    <!-- TAB: Layers (Collage) -->
-                    <div class="tab-content active" id="tab-layers-${id}">
-                        <div class="section-head">이미지 레이어</div>
-                        <input type="file" id="fileAdd-${id}" accept="image/*" multiple>
-                        <div class="layer-list" id="layerList-${id}"></div>
-
-                        <div id="layerCtrl-${id}" style="display:none;">
-                            <div class="sep"><div class="diamond"></div></div>
-                            <div class="ctrl" style="margin-top:8px;">
-                                <div class="ctrl-label"><span>회전</span><span id="lrot-val-${id}">0°</span></div>
-                                <input type="range" id="lrot-${id}" min="-180" max="180" value="0">
-                            </div>
-                            <div class="ctrl" style="margin-top:8px;">
-                                <div class="ctrl-label"><span>크기</span><span id="lscale-val-${id}">100%</span></div>
-                                <input type="range" id="lscale-${id}" min="5" max="500" value="100">
-                            </div>
-                            <div class="ctrl" style="margin-top:8px;">
-                                <div class="layer-opacity">
-                                    <span style="width:auto;">불투명도</span>
-                                    <input type="range" id="lopacity-${id}" min="0" max="100" value="100">
-                                    <span id="lopacity-val-${id}">100%</span>
-                                </div>
-                            </div>
-                            <div class="layer-actions" style="margin-top:6px;">
-                                <button class="btn-sm" onclick="moveLayer(${id},-1)">▲ 위로</button>
-                                <button class="btn-sm" onclick="moveLayer(${id},1)">▼ 아래로</button>
-                                <button class="btn-sm" onclick="duplicateLayer(${id})">복제</button>
-                                <button class="btn-sm" onclick="removeLayer(${id})" style="color:var(--danger);">삭제</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB: Subtitle -->
-                    <div class="tab-content" id="tab-subtitle-${id}">
-                        <div class="section-head">자막 텍스트</div>
-                        <div class="ctrl">
-                            <textarea id="text-${id}" placeholder="자막을 입력하십시오.">${scenes[id].text}</textarea>
-                        </div>
-                        <div class="ctrl">
-                            <div class="ctrl-label"><span>세로 위치</span></div>
-                            <input type="range" id="textY-${id}" min="-500" max="500" value="0">
-                        </div>
-                        <div class="ctrl">
-                            <div class="ctrl-label"><span>크기</span><span id="size-val-${id}">60px</span></div>
-                            <input type="range" id="size-${id}" min="20" max="200" value="60">
-                        </div>
-
-                        <div class="sep"><div class="diamond"></div></div>
-
-                        <div class="section-head" id="syncGroup1-${id}">서체 설정</div>
-                        <div class="ctrl" id="syncGroup2-${id}">
-                            <select id="fontFamily-${id}">
-                                <option value="pretendard">프리텐다드</option>
-                                <option value="chosun">조선 굴림체</option>
-                                <option value="gulim">굴림체</option>
-                            </select>
-                            <div class="check-row" style="margin-top:6px;">
-                                <label><input type="checkbox" id="bold-${id}"> 볼드</label>
-                                <label><input type="checkbox" id="italic-${id}"> 이탤릭</label>
-                                <label><input type="checkbox" id="outline-${id}" checked> 테두리</label>
-                            </div>
-                        </div>
-                        <div class="ctrl" id="syncGroup3-${id}">
-                            <div class="color-pick">
-                                <span class="ctrl-label" style="margin:0;">자막 색상</span>
-                                <input type="color" id="color-${id}" value="#ffffff">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- TAB: Style -->
-                    <div class="tab-content" id="tab-style-${id}">
-                        <div class="section-head">로고</div>
-                        <div class="ctrl">
-                            <select id="logoStyle-${id}">
-                                <option value="none">없음</option>
-                                <option value="ocn">ARCH (OCN 오마주)</option>
-                                <option value="netflix">A 마크 (넷플릭스 오마주)</option>
-                            </select>
-                        </div>
-                        <div class="ctrl" id="syncGroupTitle-${id}">
-                            <div class="ctrl-label"><span>영화 제목</span></div>
-                            <input type="text" id="movieTitle-${id}" placeholder="로고 위에 표시할 제목">
-                        </div>
-
-                        <div class="sep"><div class="diamond"></div></div>
-
-                        <div class="section-head">효과</div>
-                        <div class="check-row">
-                            <label><input type="checkbox" id="grain-${id}"> 필름 그레인</label>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            workspace.appendChild(card);
-            initEvents(id);
-            toggleSyncUI(id);
-            draw(id);
-        }
-
-        function toggleSyncUI(id) {
-            if (id === 0) return;
-            const locked = scenes[id].syncMaster;
-            ['syncGroup1-', 'syncGroup2-', 'syncGroup3-', 'syncGroupTitle-'].forEach(prefix => {
-                const el = document.getElementById(prefix + id);
-                if (el) el.classList.toggle('locked-ui', locked);
-            });
-        }
-
-        function initEvents(id) {
-            const s = scenes[id];
-            const canvas = document.getElementById(`canvas-${id}`);
-            const wrap = document.getElementById(`wrap-${id}`);
-
-            // Tab switching
-            document.querySelectorAll(`#panel-${id} .mode-tab`).forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll(`#panel-${id} .mode-tab`).forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll(`#panel-${id} .tab-content`).forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(`tab-${tab.dataset.tab}-${id}`).classList.add('active');
-                });
-            });
-
-            // Sync
-            const syncEl = document.getElementById(`sync-${id}`);
-            if (syncEl) {
-                syncEl.addEventListener('change', e => {
-                    s.syncMaster = e.target.checked;
-                    toggleSyncUI(id);
-                    draw(id);
-                });
-            }
-
-            // File add (multiple images → layers)
-            document.getElementById(`fileAdd-${id}`).addEventListener('change', e => {
-                Array.from(e.target.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        const img = new Image();
-                        img.onload = () => {
-                            s.layers.push({
-                                img, x: 0, y: 0, scale: 1, rotate: 0, opacity: 1,
-                                name: file.name.length > 18 ? file.name.slice(0, 15) + '…' : file.name
-                            });
-                            s.activeLayer = s.layers.length - 1;
-                            renderLayerList(id);
-                            draw(id);
-                        };
-                        img.src = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
-                e.target.value = '';
-            });
-
-            // Layer controls
-            document.getElementById(`lrot-${id}`).oninput = e => {
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                s.layers[s.activeLayer].rotate = parseInt(e.target.value);
-                document.getElementById(`lrot-val-${id}`).textContent = e.target.value + '°';
-                draw(id);
-            };
-            document.getElementById(`lscale-${id}`).oninput = e => {
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                s.layers[s.activeLayer].scale = parseInt(e.target.value) / 100;
-                document.getElementById(`lscale-val-${id}`).textContent = e.target.value + '%';
-                draw(id);
-            };
-            document.getElementById(`lopacity-${id}`).oninput = e => {
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                s.layers[s.activeLayer].opacity = parseInt(e.target.value) / 100;
-                document.getElementById(`lopacity-val-${id}`).textContent = e.target.value + '%';
-                draw(id);
-            };
-
-            // Subtitle controls
-            document.getElementById(`text-${id}`).oninput = e => { s.text = e.target.value; draw(id); };
-            document.getElementById(`textY-${id}`).oninput = e => { s.textY = parseInt(e.target.value); draw(id); };
-            document.getElementById(`size-${id}`).oninput = e => {
-                s.fontSize = parseInt(e.target.value);
-                document.getElementById(`size-val-${id}`).textContent = s.fontSize + 'px';
-                draw(id);
-            };
-
-            const syncUpdate = () => id === 0 ? redrawAll() : draw(id);
-            document.getElementById(`movieTitle-${id}`).oninput = e => { s.movieTitle = e.target.value; syncUpdate(); };
-            document.getElementById(`color-${id}`).onchange = e => { s.textColor = e.target.value; syncUpdate(); };
-            document.getElementById(`fontFamily-${id}`).onchange = e => { s.fontFamily = e.target.value; syncUpdate(); };
-            document.getElementById(`bold-${id}`).onchange = e => { s.isBold = e.target.checked; syncUpdate(); };
-            document.getElementById(`italic-${id}`).onchange = e => { s.isItalic = e.target.checked; syncUpdate(); };
-            document.getElementById(`outline-${id}`).onchange = e => { s.isOutline = e.target.checked; syncUpdate(); };
-
-            document.getElementById(`logoStyle-${id}`).onchange = e => { s.logoStyle = e.target.value; redrawAll(); };
-            document.getElementById(`grain-${id}`).onchange = e => { s.filmGrain = e.target.checked; draw(id); };
-
-            // Canvas interactions: drag selected layer
-            let startX, startY;
-            wrap.addEventListener('mousedown', e => {
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                s._dragging = true;
-                startX = e.clientX; startY = e.clientY;
-            });
-            window.addEventListener('mousemove', e => {
-                if (!s._dragging) return;
-                const layer = s.layers[s.activeLayer];
-                if (!layer) return;
-                const rect = canvas.getBoundingClientRect();
-                const rx = canvas.width / rect.width;
-                const ry = canvas.height / rect.height;
-                layer.x += (e.clientX - startX) * rx;
-                layer.y += (e.clientY - startY) * ry;
-                startX = e.clientX; startY = e.clientY;
-                draw(id);
-            });
-            window.addEventListener('mouseup', () => { s._dragging = false; });
-
-            // Touch support
-            wrap.addEventListener('touchstart', e => {
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                s._dragging = true;
-                const t = e.touches[0];
-                startX = t.clientX; startY = t.clientY;
-            }, { passive: true });
-            window.addEventListener('touchmove', e => {
-                if (!s._dragging) return;
-                const layer = s.layers[s.activeLayer];
-                if (!layer) return;
-                const t = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                const rx = canvas.width / rect.width;
-                const ry = canvas.height / rect.height;
-                layer.x += (t.clientX - startX) * rx;
-                layer.y += (t.clientY - startY) * ry;
-                startX = t.clientX; startY = t.clientY;
-                draw(id);
-            }, { passive: true });
-            window.addEventListener('touchend', () => { s._dragging = false; });
-
-            // Wheel: scale or rotate
-            wrap.addEventListener('wheel', e => {
-                e.preventDefault();
-                if (s.activeLayer < 0 || !s.layers[s.activeLayer]) return;
-                const layer = s.layers[s.activeLayer];
-                if (e.shiftKey) {
-                    layer.rotate += e.deltaY > 0 ? 2 : -2;
-                    layer.rotate = Math.max(-180, Math.min(180, layer.rotate));
-                    document.getElementById(`lrot-${id}`).value = layer.rotate;
-                    document.getElementById(`lrot-val-${id}`).textContent = layer.rotate + '°';
-                } else {
-                    layer.scale -= e.deltaY * 0.001;
-                    layer.scale = Math.max(0.05, Math.min(5, layer.scale));
-                    document.getElementById(`lscale-${id}`).value = Math.round(layer.scale * 100);
-                    document.getElementById(`lscale-val-${id}`).textContent = Math.round(layer.scale * 100) + '%';
+        // ── Apply Filters ──
+        if (s.filter !== 'none') {
+            const imgData = colCtx.getImageData(0, 0, totalW, totalH);
+            const px = imgData.data;
+            for (let i = 0; i < px.length; i += 4) {
+                let r = px[i], g = px[i+1], b = px[i+2];
+                switch (s.filter) {
+                    case 'bw': { const avg = r * 0.299 + g * 0.587 + b * 0.114; r = g = b = avg; break; }
+                    case 'sepia': { r = Math.min(255, r * 0.393 + g * 0.769 + b * 0.189); g = Math.min(255, r * 0.349 + g * 0.686 + b * 0.168); b = Math.min(255, r * 0.272 + g * 0.534 + b * 0.131); break; }
+                    case 'warm': { r = Math.min(255, r + 20); b = Math.max(0, b - 15); break; }
+                    case 'cool': { b = Math.min(255, b + 20); r = Math.max(0, r - 10); break; }
+                    case 'vintage': { const avg2 = r * 0.299 + g * 0.587 + b * 0.114; r = Math.min(255, avg2 * 0.5 + r * 0.5 + 20); g = Math.min(255, avg2 * 0.4 + g * 0.5 + 5); b = Math.min(255, avg2 * 0.3 + b * 0.4); break; }
+                    case 'highcon': { r = r > 128 ? Math.min(255, r + 30) : Math.max(0, r - 30); g = g > 128 ? Math.min(255, g + 30) : Math.max(0, g - 30); b = b > 128 ? Math.min(255, b + 30) : Math.max(0, b - 30); break; }
                 }
-                draw(id);
-            }, { passive: false });
+                px[i] = r; px[i+1] = g; px[i+2] = b;
+            }
+            colCtx.putImageData(imgData, 0, 0);
         }
 
-        // ── Layer List UI ──
-        function renderLayerList(id) {
-            const s = scenes[id];
-            const list = document.getElementById(`layerList-${id}`);
-            const ctrl = document.getElementById(`layerCtrl-${id}`);
-            list.innerHTML = '';
+        // Film grain
+        if (s.filter === 'grain') {
+            colCtx.save();
+            colCtx.fillStyle = colCtx.createPattern(noiseC, 'repeat');
+            colCtx.fillRect(0, 0, totalW, totalH);
+            colCtx.restore();
+        }
 
-            if (s.layers.length === 0) {
-                list.innerHTML = '<div style="font-size:0.72rem; color:var(--text-light); text-align:center; padding:12px 0;">이미지를 추가하세요</div>';
-                ctrl.style.display = 'none';
-                return;
+        // Gradient overlay
+        if (s.grad !== 'none') {
+            colCtx.save();
+            let g;
+            let c1, c2;
+
+            if (s.grad === 'custom') { c1 = s.gradC1; c2 = s.gradC2; }
+            else if (s.grad.includes('black')) { c1 = 'rgba(0,0,0,1)'; c2 = 'rgba(0,0,0,0)'; }
+            else if (s.grad.includes('warm')) { c1 = 'rgba(180,100,30,1)'; c2 = 'rgba(180,100,30,0)'; }
+            else if (s.grad.includes('cool')) { c1 = 'rgba(30,60,180,1)'; c2 = 'rgba(30,60,180,0)'; }
+
+            if (s.grad.startsWith('tb') || s.grad === 'custom') g = colCtx.createLinearGradient(0, 0, 0, totalH);
+            else if (s.grad.startsWith('bt')) { g = colCtx.createLinearGradient(0, totalH, 0, 0); }
+            else if (s.grad.startsWith('lr')) g = colCtx.createLinearGradient(0, 0, totalW, 0);
+            else g = colCtx.createLinearGradient(0, 0, 0, totalH);
+
+            if (s.grad === 'custom') {
+                g.addColorStop(0, c1);
+                g.addColorStop(1, c2);
+            } else {
+                g.addColorStop(0, c1);
+                g.addColorStop(1, c2);
             }
 
-            s.layers.forEach((layer, i) => {
-                const item = document.createElement('div');
-                item.className = 'layer-item' + (i === s.activeLayer ? ' active' : '');
-                item.innerHTML = `
-                    <span class="l-name">${i + 1}. ${layer.name}</span>
-                    <button title="삭제" onclick="event.stopPropagation(); removeLayerAt(${id},${i})">✕</button>
-                `;
-                item.addEventListener('click', () => {
-                    s.activeLayer = i;
-                    renderLayerList(id);
-                    syncLayerControls(id);
-                    draw(id);
-                });
-                list.appendChild(item);
-            });
-
-            ctrl.style.display = s.activeLayer >= 0 ? 'block' : 'none';
-            if (s.activeLayer >= 0) syncLayerControls(id);
+            colCtx.globalAlpha = s.gradA;
+            colCtx.fillStyle = g;
+            colCtx.fillRect(0, 0, totalW, totalH);
+            colCtx.restore();
         }
+    }
 
-        function syncLayerControls(id) {
-            const s = scenes[id];
-            const layer = s.layers[s.activeLayer];
-            if (!layer) return;
-            document.getElementById(`lrot-${id}`).value = layer.rotate;
-            document.getElementById(`lrot-val-${id}`).textContent = layer.rotate + '°';
-            document.getElementById(`lscale-${id}`).value = Math.round(layer.scale * 100);
-            document.getElementById(`lscale-val-${id}`).textContent = Math.round(layer.scale * 100) + '%';
-            document.getElementById(`lopacity-${id}`).value = Math.round(layer.opacity * 100);
-            document.getElementById(`lopacity-val-${id}`).textContent = Math.round(layer.opacity * 100) + '%';
+    // ── Collage public API ──
+    window.COL = {
+        move(dir) {
+            const s = colState, i = s.activeIdx, j = i + dir;
+            if (j < 0 || j >= s.images.length) return;
+            [s.images[i], s.images[j]] = [s.images[j], s.images[i]];
+            s.activeIdx = j;
+            colRenderList(); colDraw();
+        },
+        dup() {
+            const s = colState, item = curImg(); if (!item) return;
+            s.images.splice(s.activeIdx + 1, 0, { ...item, img: item.img, name: item.name + ' 복사' });
+            s.activeIdx++;
+            colRenderList(); colDraw();
+        },
+        del() {
+            const s = colState;
+            s.images.splice(s.activeIdx, 1);
+            if (s.activeIdx >= s.images.length) s.activeIdx = s.images.length - 1;
+            colRenderList(); colDraw();
+        },
+        exportImg() {
+            if (!colState.images.length) return;
+            // Re-draw without active indicator
+            const saved = colState.activeIdx;
+            colState.activeIdx = -1;
+            colDraw();
+            dlC(colCanvas, 'ARCH_COLLAGE.png');
+            colState.activeIdx = saved;
+            colDraw();
         }
+    };
 
-        // Global layer operations
-        window.moveLayer = (id, dir) => {
-            const s = scenes[id];
-            const i = s.activeLayer;
-            const j = i + dir;
-            if (j < 0 || j >= s.layers.length) return;
-            [s.layers[i], s.layers[j]] = [s.layers[j], s.layers[i]];
-            s.activeLayer = j;
-            renderLayerList(id);
-            draw(id);
-        };
-
-        window.duplicateLayer = (id) => {
-            const s = scenes[id];
-            const layer = s.layers[s.activeLayer];
-            if (!layer) return;
-            s.layers.splice(s.activeLayer + 1, 0, { ...layer, x: layer.x + 30, y: layer.y + 30, name: layer.name + ' 복사' });
-            s.activeLayer = s.activeLayer + 1;
-            renderLayerList(id);
-            draw(id);
-        };
-
-        window.removeLayer = (id) => {
-            const s = scenes[id];
-            s.layers.splice(s.activeLayer, 1);
-            s.activeLayer = Math.min(s.activeLayer, s.layers.length - 1);
-            renderLayerList(id);
-            draw(id);
-        };
-
-        window.removeLayerAt = (id, i) => {
-            const s = scenes[id];
-            s.layers.splice(i, 1);
-            if (s.activeLayer >= s.layers.length) s.activeLayer = s.layers.length - 1;
-            renderLayerList(id);
-            draw(id);
-        };
-
-        // ── Draw ──
-        function draw(id) {
-            const s = scenes[id];
-            const canvas = document.getElementById(`canvas-${id}`);
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width, h = canvas.height;
-
-            let ds = { ...s };
-            if (s.syncMaster && id !== 0 && scenes[0]) {
-                ds.movieTitle = scenes[0].movieTitle;
-                ds.fontFamily = scenes[0].fontFamily;
-                ds.textColor = scenes[0].textColor;
-                ds.isBold = scenes[0].isBold;
-                ds.isItalic = scenes[0].isItalic;
-                ds.isOutline = scenes[0].isOutline;
-            }
-
-            // Background
-            ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, w, h);
-
-            // Draw all layers (collage)
-            s.layers.forEach((layer, i) => {
-                ctx.save();
-                ctx.globalAlpha = layer.opacity;
-                ctx.translate(w / 2 + layer.x, h / 2 + layer.y);
-                ctx.rotate(layer.rotate * Math.PI / 180);
-                const ratio = Math.max(w / layer.img.width, h / layer.img.height);
-                ctx.scale(ratio * layer.scale, ratio * layer.scale);
-                ctx.drawImage(layer.img, -layer.img.width / 2, -layer.img.height / 2);
-                ctx.restore();
-
-                // Active layer border indicator (subtle)
-                if (i === s.activeLayer && s.layers.length > 1) {
-                    ctx.save();
-                    ctx.strokeStyle = globalAccent;
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([6, 4]);
-                    const cX = w / 2 + layer.x, cY = h / 2 + layer.y;
-                    const bw = 120, bh = 80;
-                    ctx.strokeRect(cX - bw / 2, cY - bh / 2, bw, bh);
-                    ctx.restore();
-                }
-            });
-
-            // Film grain
-            if (ds.filmGrain) {
-                ctx.save();
-                ctx.fillStyle = ctx.createPattern(noiseCanvas, 'repeat');
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-            }
-
-            // Letterbox
-            const lh = h * 0.12;
-            ctx.fillStyle = "#000";
-            ctx.fillRect(0, 0, w, lh);
-            ctx.fillRect(0, h - lh, w, lh);
-
-            // Logo
-            if (ds.logoStyle !== 'none') {
-                ctx.save();
-                const logoY = 65;
-                if (ds.logoStyle === 'ocn') {
-                    const lW = 125, lH = 40, lX = w - lW - 50;
-                    if (ds.movieTitle.trim()) {
-                        ctx.fillStyle = "#fff";
-                        ctx.font = 'bold 18px "Pretendard", sans-serif';
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-                        ctx.fillText(ds.movieTitle, lX + lW / 2, logoY - 8);
-                    }
-                    ctx.fillStyle = globalAccent;
-                    ctx.beginPath(); ctx.roundRect(lX, logoY, lW, lH, 4); ctx.fill();
-                    ctx.fillStyle = "#000";
-                    ctx.font = '900 30px "Arial Black", sans-serif';
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('ARCH', lX + lW / 2, logoY + lH / 2 + 2);
-                } else if (ds.logoStyle === 'netflix') {
-                    const lX = w - 70;
-                    if (ds.movieTitle.trim()) {
-                        ctx.fillStyle = "#fff";
-                        ctx.font = 'bold 18px "Pretendard", sans-serif';
-                        ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-                        ctx.fillText(ds.movieTitle, lX, logoY - 8);
-                    }
-                    ctx.fillStyle = "#E50914";
-                    ctx.font = 'italic 900 65px "Arial Black", sans-serif';
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-                    ctx.shadowColor = "rgba(0,0,0,0.8)";
-                    ctx.shadowBlur = 10;
-                    ctx.fillText('A', lX, logoY - 5);
-                }
-                ctx.restore();
-            }
-
-            // Subtitle
-            if (ds.text) {
-                ctx.save();
-                let face = "'Pretendard', sans-serif";
-                if (ds.fontFamily === 'chosun') face = "'JoseonGulim', sans-serif";
-                if (ds.fontFamily === 'gulim') face = "'Gulim', 굴림, sans-serif";
-
-                ctx.font = `${ds.isItalic ? 'italic ' : ''}${ds.isBold ? 'bold ' : ''}${ds.fontSize}px ${face}`;
-                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-
-                const lines = ds.text.split('\n');
-                const lineH = ds.fontSize * 1.3;
-                const startY = h - (h * 0.08) - ds.textY - ((lines.length - 1) * lineH);
-
-                lines.forEach((line, i) => {
-                    const py = startY + i * lineH;
-                    if (ds.isOutline) {
-                        ctx.strokeStyle = "#000";
-                        ctx.lineWidth = ds.fontSize * 0.15;
-                        ctx.lineJoin = "round";
-                        ctx.strokeText(line, w / 2, py);
-                    }
-                    ctx.fillStyle = ds.textColor;
-                    ctx.fillText(line, w / 2, py);
-                });
-                ctx.restore();
-            }
-        }
-
-        window.deleteScene = (id) => {
-            delete scenes[id];
-            const el = document.getElementById(`card-${id}`);
-            if (el) el.remove();
-        };
-
-        function exportAll() {
-            const ids = Object.keys(scenes).sort((a, b) => a - b);
-            if (!ids.length) return;
-            const master = document.createElement('canvas');
-            master.width = canvasW;
-            master.height = canvasH * ids.length;
-            const mctx = master.getContext('2d');
-            ids.forEach((id, i) => {
-                mctx.drawImage(document.getElementById(`canvas-${id}`), 0, i * canvasH);
-            });
-            dl(master, 'ARCH_CINEMA_ALL.png');
-        }
-
-        function exportSingle() {
-            // Export the first scene or last interacted
-            const ids = Object.keys(scenes);
-            if (!ids.length) return;
-            dl(document.getElementById(`canvas-${ids[ids.length - 1]}`), `ARCH_CINEMA_SCENE_${ids[ids.length - 1]}.png`);
-        }
-
-        function dl(canvas, name) {
-            const link = document.createElement('a');
-            link.download = name;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-    })();
-    </script>
+    colDraw();
+})();
+</script>
 </body>
 </html>
