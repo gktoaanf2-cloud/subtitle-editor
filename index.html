@@ -169,7 +169,8 @@
                 <select id="colDir">
                     <option value="v">세로 (위→아래)</option>
                     <option value="h">가로 (왼→오른)</option>
-                    <option value="grid">그리드 (행×열)</option>
+                    <option value="grid">그리드 (정사각형)</option>
+                    <option value="gridfit">그리드 (원본비율)</option>
                 </select>
             </div>
             <div id="gridSettings" style="display:none;">
@@ -424,7 +425,7 @@
     document.getElementById('colOutW').addEventListener('change', e => { colState.outW = Math.max(100, parseInt(e.target.value) || 1920); colDraw(); });
     document.getElementById('colDir').addEventListener('change', e => {
         colState.dir = e.target.value;
-        document.getElementById('gridSettings').style.display = e.target.value === 'grid' ? 'block' : 'none';
+        document.getElementById('gridSettings').style.display = (e.target.value === 'grid' || e.target.value === 'gridfit') ? 'block' : 'none';
         colDraw();
     });
     document.getElementById('gridCols').addEventListener('input', e => {
@@ -539,30 +540,55 @@
         const isV = s.dir === 'v';
         const isH = s.dir === 'h';
         const isGrid = s.dir === 'grid';
+        const isGridFit = s.dir === 'gridfit';
 
         let slots = [];
         let totalW, totalH;
 
-        if (isGrid) {
-            // ── Grid layout ──
+        if (isGrid || isGridFit) {
             const cols = Math.max(1, Math.min(6, s.gridCols));
             const rows = Math.ceil(s.images.length / cols);
             const cellW = Math.floor((outW - gap * (cols - 1)) / cols);
-            const cellH = cellW; // square cells
-            totalW = outW;
-            totalH = rows * cellH + gap * (rows - 1);
 
-            s.images.forEach((item, i) => {
-                const col = i % cols;
-                const row = Math.floor(i / cols);
-                slots.push({
-                    x: col * (cellW + gap),
-                    y: row * (cellH + gap),
-                    w: cellW,
-                    h: cellH,
-                    item
+            if (isGrid) {
+                // Square cells, images cropped to fill
+                const cellH = cellW;
+                totalW = outW;
+                totalH = rows * cellH + gap * (rows - 1);
+                s.images.forEach((item, i) => {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    slots.push({ x: col * (cellW + gap), y: row * (cellH + gap), w: cellW, h: cellH, item, fit: false });
                 });
-            });
+            } else {
+                // Original aspect ratio — row height = tallest image in row
+                totalW = outW;
+                let cy = 0;
+                for (let r = 0; r < rows; r++) {
+                    let rowH = 0;
+                    // Find tallest cell in this row
+                    for (let c = 0; c < cols; c++) {
+                        const idx = r * cols + c;
+                        if (idx >= s.images.length) break;
+                        const item = s.images[idx];
+                        const aspect = item.img.width / item.img.height;
+                        const h = Math.round(cellW / aspect);
+                        if (h > rowH) rowH = h;
+                    }
+                    // Place images in this row
+                    for (let c = 0; c < cols; c++) {
+                        const idx = r * cols + c;
+                        if (idx >= s.images.length) break;
+                        const item = s.images[idx];
+                        const aspect = item.img.width / item.img.height;
+                        const imgH = Math.round(cellW / aspect);
+                        const yOffset = Math.round((rowH - imgH) / 2); // center vertically
+                        slots.push({ x: c * (cellW + gap), y: cy + yOffset, w: cellW, h: imgH, item, fit: true });
+                    }
+                    cy += rowH + gap;
+                }
+                totalH = cy - (rows > 0 ? gap : 0);
+            }
         } else if (isV) {
             // ── Vertical stack ──
             totalW = outW;
@@ -571,7 +597,7 @@
                 const aspect = item.img.width / item.img.height;
                 const slotW = outW;
                 const slotH = Math.round(slotW / aspect);
-                slots.push({ x: 0, y: cy, w: slotW, h: slotH, item });
+                slots.push({ x: 0, y: cy, w: slotW, h: slotH, item, fit: false });
                 cy += slotH + gap;
             });
             totalH = cy - (s.images.length > 0 ? gap : 0);
@@ -585,7 +611,7 @@
             let cx = 0;
             s.images.forEach((item, i) => {
                 const slotW = Math.round(rowH * aspects[i]);
-                slots.push({ x: cx, y: 0, w: slotW, h: rowH, item });
+                slots.push({ x: cx, y: 0, w: slotW, h: rowH, item, fit: false });
                 cx += slotW + gap;
             });
             totalW = cx - (s.images.length > 0 ? gap : 0);
@@ -611,7 +637,9 @@
             colCtx.translate(centerX, centerY);
             colCtx.rotate(item.rotate * Math.PI / 180);
 
-            const coverRatio = Math.max(sl.w / item.img.width, sl.h / item.img.height) * item.scale;
+            // fit: contain (no crop) vs cover (crop to fill)
+            const fitMode = sl.fit ? Math.min(sl.w / item.img.width, sl.h / item.img.height) : Math.max(sl.w / item.img.width, sl.h / item.img.height);
+            const coverRatio = fitMode * item.scale;
             colCtx.scale(coverRatio, coverRatio);
             colCtx.drawImage(item.img, -item.img.width / 2, -item.img.height / 2);
             colCtx.restore();
