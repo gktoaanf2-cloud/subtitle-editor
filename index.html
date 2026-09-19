@@ -54,7 +54,7 @@
         #saveState::before{content:'';display:inline-block;width:5px;height:5px;background:var(--acc-g);transform:rotate(45deg);margin-right:6px;vertical-align:1px;}
 
         /* ── Top Mode Switch ── */
-        .mode-switch{display:flex;justify-content:center;gap:0;margin:20px auto 30px;max-width:520px;border:1px solid var(--bdr);}
+        .mode-switch{display:flex;justify-content:center;gap:0;margin:20px auto 30px;max-width:640px;border:1px solid var(--bdr);}
         .mode-btn{flex:1;padding:10px 0;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;background:var(--panel);color:var(--tx-m);border:none;font-family:inherit;transition:all .15s;}
         .mode-btn.active{background:var(--acc);color:var(--bg);}
         .mode-btn:not(:last-child){border-right:1px solid var(--bdr);}
@@ -185,6 +185,23 @@
         .exp-row{display:flex;gap:6px;flex-wrap:wrap;}
         .exp-row .btn{flex:1;padding:10px 8px;letter-spacing:2px;}
 
+        /* ══════════ RETOUCH MODE ══════════ */
+        .rt-stage{background:#1a1815;display:flex;flex-direction:column;min-width:0;}
+        .rt-bar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:12px 14px 10px;border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:6;}
+        .rt-grp{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+        .rt-bar .btn-sm{background:transparent;color:#E8DFD0;border-color:rgba(255,255,255,.22);}
+        .rt-bar .btn-sm:hover{background:rgba(255,255,255,.08);}
+        .rt-bar .btn-sm.on{background:var(--acc-g);color:#1a1815;border-color:var(--acc-g);}
+        .rt-gap{width:8px;}
+        .rt-zv{font-size:.64rem;color:rgba(232,223,208,.7);min-width:42px;text-align:center;font-variant-numeric:tabular-nums;}
+        .rt-view{height:68vh;min-height:320px;overflow:auto;display:flex;padding:12px;background:repeating-conic-gradient(#221f1b 0 25%,#1a1815 0 50%) 0 0/24px 24px;overscroll-behavior:contain;}
+        .rt-view canvas{margin:auto;flex-shrink:0;max-width:none;display:block;touch-action:none;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 30px rgba(0,0,0,.4);}
+        .rt-view[data-tool="select"] canvas{cursor:default;}
+        .rt-view[data-tool="pen"] canvas,.rt-view[data-tool="rect"] canvas,.rt-view[data-tool="ellipse"] canvas{cursor:crosshair;}
+        .rt-view[data-tool="text"] canvas{cursor:text;}
+        .rt-view[data-tool="pick"] canvas{cursor:copy;}
+        .rt-note{font-size:.62rem;letter-spacing:.5px;color:rgba(232,223,208,.55);padding:8px 16px 14px;line-height:1.6;}
+
         /* ── toast / sheet ── */
         .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--tx);color:var(--bg);font-size:.74rem;letter-spacing:.5px;padding:10px 18px;opacity:0;pointer-events:none;transition:all .25s;z-index:10000;max-width:88vw;text-align:center;}
         .toast.on{opacity:1;transform:translate(-50%,0);}
@@ -207,6 +224,9 @@
             .canvas-wrap{min-height:0;padding:40px 0 26px;}
             .canvas-wrap canvas{max-height:60vh;}
             .mot-view .canvas-hint{display:none;}
+            .rt-view{height:58vh;min-height:260px;padding:8px;}
+            .rt-bar{padding:10px 8px;}
+            .rt-bar .btn-sm{padding:8px 9px;}
             .s-panel,.col-panel{max-height:none;border-left:none;border-top:1px solid var(--bdr);padding:16px;}
             .sub-footer .btn,.col-footer .btn{flex:1 1 100%;padding:13px 10px;}
             .btn-sm{padding:8px 12px;}
@@ -235,6 +255,7 @@
 <div class="mode-switch">
     <button class="mode-btn active" data-mode="subtitle">자막</button>
     <button class="mode-btn" data-mode="collage">콜라주</button>
+    <button class="mode-btn" data-mode="retouch">리터칭</button>
     <button class="mode-btn" data-mode="motion">모션 · GIF</button>
 </div>
 
@@ -376,6 +397,75 @@
     </div>
     <div class="col-footer">
         <button class="btn btn-p" onclick="COL.exportImg()">렌더링 저장</button>
+    </div>
+</div>
+
+<!-- ═══  RETOUCH MODE  ═══ -->
+<div class="mode-area" id="area-retouch">
+    <div class="col-layout">
+        <div class="rt-stage">
+            <div class="rt-bar" id="rtTools">
+                <div class="rt-grp">
+                    <button class="btn-sm" data-tool="select">선택</button><button class="btn-sm" data-tool="pen">펜</button><button class="btn-sm" data-tool="rect">사각형</button><button class="btn-sm" data-tool="ellipse">원</button><button class="btn-sm" data-tool="text">텍스트</button><button class="btn-sm" data-tool="pick">스포이드</button>
+                </div>
+                <div class="rt-grp">
+                    <button class="btn-sm" id="rtUndo" title="실행 취소 (Ctrl+Z)">↶</button><button class="btn-sm" id="rtRedo" title="다시 실행 (Ctrl+Shift+Z)">↷</button>
+                    <span class="rt-gap"></span>
+                    <button class="btn-sm" id="rtZoomOut">－</button><span class="rt-zv" id="rtZoomV">100%</span><button class="btn-sm" id="rtZoomIn">＋</button>
+                    <button class="btn-sm" id="rtZoomFit">맞춤</button><button class="btn-sm" id="rtZoom100">1:1</button>
+                </div>
+            </div>
+            <div class="rt-view" id="rtView"><canvas id="rtCanvas" width="1280" height="720"></canvas></div>
+            <p class="rt-note" id="rtNote"></p>
+        </div>
+        <div class="col-panel">
+            <div class="section-head">원본 이미지</div>
+            <input type="file" id="rtFile" accept="image/*">
+            <p class="note" id="rtInfo"></p>
+            <p class="note">원본 해상도 그대로 열려요. 그림 위로 파일을 끌어다 놓아도 돼요. 확대는 Ctrl+휠 또는 두 손가락.</p>
+
+            <div id="rtShapeBox">
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">덮기</div>
+                <div class="row2" style="margin-bottom:8px;">
+                    <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">색</span><input type="color" id="rtColor" value="#000000"><span class="note" id="rtColorHex"></span></div>
+                    <div class="check-row" id="rtFillRow" style="flex:0 0 auto;"><label><input type="checkbox" id="rtFill" checked> 채우기</label></div>
+                </div>
+                <div class="ctrl" id="rtSizeRow"><div class="ctrl-label"><span>굵기</span><span id="rtSizeV"></span></div><input type="range" id="rtSize" min="1" max="200" value="20"></div>
+            </div>
+
+            <div id="rtTextBox" style="display:none;flex-direction:column;gap:8px;">
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">글씨</div>
+                <textarea id="rtText" style="height:64px;"></textarea>
+                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>크기</span><span id="rtTSizeV"></span></div><input type="range" id="rtTSize" min="6" max="400" value="60"></div>
+                <div class="ctrl" id="rtTRotRow" style="margin:0;"><div class="ctrl-label"><span>회전</span><span id="rtTRotV">0°</span></div><input type="range" id="rtTRot" min="-180" max="180" value="0"></div>
+                <select id="rtTFont"></select>
+                <div class="row2">
+                    <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">글씨색</span><input type="color" id="rtTColor" value="#ffffff"></div>
+                    <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">테두리색</span><input type="color" id="rtTOColor" value="#000000"></div>
+                </div>
+                <div class="check-row"><label><input type="checkbox" id="rtTBold"> 볼드</label><label><input type="checkbox" id="rtTItalic"> 이탤릭</label><label><input type="checkbox" id="rtTOutline"> 테두리</label></div>
+            </div>
+
+            <div id="rtSelBox" style="display:none;">
+                <div class="sep"><div class="dia"></div></div>
+                <div class="section-head">고른 것</div>
+                <div class="strip-actions">
+                    <button class="btn-sm" id="rtDup">복제</button><button class="btn-sm" id="rtFront">맨 앞으로</button><button class="btn-sm" id="rtBack">맨 뒤로</button><button class="btn-sm" id="rtDel" style="color:var(--danger);">삭제</button>
+                </div>
+            </div>
+
+            <div class="sep"><div class="dia"></div></div>
+            <div class="section-head">저장</div>
+            <div class="ctrl"><div class="ctrl-label"><span>파일 형식</span></div>
+                <select id="rtFmt"><option value="same">원본과 같은 형식</option><option value="image/png">PNG</option><option value="image/jpeg">JPG</option></select></div>
+            <div class="exp-row">
+                <button class="btn btn-p" id="rtSave" disabled>원본 크기로 저장</button>
+                <button class="btn" id="rtToSub" disabled>자막 컷으로 보내기</button>
+            </div>
+            <button class="btn-sm" id="rtClear" style="color:var(--danger);align-self:flex-start;">덮기 · 글씨 모두 지우기</button>
+        </div>
     </div>
 </div>
 
@@ -626,6 +716,7 @@
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
         document.querySelectorAll('.mode-area').forEach(a => a.classList.toggle('active', a.id === 'area-' + m));
         if (m === 'motion') MOT_API.onShow(); else MOT_API.stop();
+        if (m === 'retouch') RET_API.onShow();
         saveSoon();
     }
     document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
@@ -637,7 +728,6 @@
     const SYNC_KEYS = ['movieTitle', 'fontFamily', 'textColor', 'isBold', 'isItalic', 'isOutline'];
     const gAccent = '#8B7355';
     const CARD = {};   // id → {el, cv, wrap}
-    const PUI = {};    // id → 편집 도구 상태(기기 저장 안 함)
     const subWS = $('subWorkspace');
 
     function newScene(first) {
@@ -748,15 +838,12 @@
             const s = sceneById(id), c = CARD[id]; if (!s || !c) return;
             const { w, h } = sceneSize(s);
             if (c.cv.width !== w) c.cv.width = w; if (c.cv.height !== h) c.cv.height = h;
-            const u = PUI[id], sel = u && u.tool === 'text' && u.sel ? u.sel : null;
-            drawScene(c.cv.getContext('2d'), s, w, h, sel);
+            drawScene(c.cv.getContext('2d'), s, w, h, null);
         });
         dirty.clear();
     }
 
-    const TOOLS = [['move', '이동'], ['pen', '펜'], ['rect', '사각형'], ['ellipse', '원'], ['text', '텍스트'], ['pick', '스포이드']];
     function buildCard(s) {
-        PUI[s.id] = PUI[s.id] || { tool: 'move', color: '#000000', size: 40, fill: true, tx: { text: '', size: 70, color: '#ffffff', font: 'pretendard', bold: true, italic: false, outline: true }, sel: null };
         const card = document.createElement('div'); card.className = 'scene-card'; card.id = 'sc-' + s.id;
         card.innerHTML = `
             <div class="scene-tag"></div>
@@ -764,14 +851,16 @@
                 <button data-a="up" title="위로">▲</button><button data-a="down" title="아래로">▼</button>
                 <button data-a="save">이 컷 저장</button><button data-a="del" class="del">삭제</button>
             </div>
-            <div class="canvas-wrap"><canvas width="1920" height="1080"></canvas><div class="canvas-hint"></div></div>
+            <div class="canvas-wrap"><canvas width="1920" height="1080"></canvas><div class="canvas-hint">드래그: 이동 · 휠 / 두 손가락: 확대</div></div>
             <div class="s-panel">
                 <div class="sync-box"><label><input type="checkbox" data-k="sync"> 1번 컷 동기화</label></div>
                 <div class="section-head">배경 이미지</div>
                 <div class="ctrl"><input type="file" data-f="img" accept="image/*"></div>
+                <p class="note">그림을 먼저 지우거나 글씨를 넣고 싶으면 <b>리터칭</b> 탭에서 고친 뒤 불러오세요.</p>
                 <div class="ctrl"><div class="ctrl-label"><span>확대</span><span data-v="scale"></span></div><input type="range" data-k="scale" min="10" max="800" value="100"></div>
                 <div class="ctrl"><div class="ctrl-label"><span>회전</span><span data-v="rotate"></span></div><input type="range" data-k="rotate" min="-180" max="180" value="0"></div>
                 <div class="row2"><div class="check-row"><label><input type="checkbox" data-k="filmGrain"> 필름 그레인</label></div><button class="btn-sm" data-a="fit" style="flex:0 0 auto;">위치 초기화</button></div>
+                <div class="row2" data-legacy><button class="btn-sm" data-a="clear" style="color:var(--danger);">이전 버전에서 넣은 덮기 · 글씨 지우기</button></div>
                 <div class="sep"><div class="dia"></div></div>
                 <div class="section-head">로고</div>
                 <div class="ctrl"><select data-k="logoStyle"><option value="none">없음</option><option value="ocn">ARCH (OCN)</option><option value="netflix">A 마크</option></select></div>
@@ -785,34 +874,11 @@
                     <div class="check-row" style="margin-top:4px;"><label><input type="checkbox" data-k="isBold"> 볼드</label><label><input type="checkbox" data-k="isItalic"> 이탤릭</label><label><input type="checkbox" data-k="isOutline"> 테두리</label></div>
                 </div>
                 <div class="ctrl" data-g="sync"><div class="color-pick"><span style="font-size:.67rem;">색상</span><input type="color" data-k="textColor"></div></div>
-                <div class="sep"><div class="dia"></div></div>
-                <div class="section-head">덮기 · 글씨 넣기</div>
-                <div class="tool-row">${TOOLS.map(([k, l]) => `<button class="btn-sm" data-tool="${k}">${l}</button>`).join('')}</div>
-                <div class="paint-opts" data-po>
-                    <div class="row2">
-                        <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">색</span><input type="color" data-p="color"></div>
-                        <label class="check-row" data-po-fill style="flex:0 0 auto;"><span style="display:flex;gap:4px;align-items:center;"><input type="checkbox" data-p="fill"> 채우기</span></label>
-                    </div>
-                    <div class="ctrl" data-po-size style="margin:0;"><div class="ctrl-label"><span>굵기</span><span data-pv="size"></span></div><input type="range" data-p="size" min="2" max="200" value="40"></div>
-                    <div data-po-text style="display:none;flex-direction:column;gap:6px;">
-                        <textarea data-t="text" placeholder="넣을 글씨 — 입력 후 그림을 누르면 배치돼요" style="height:54px;"></textarea>
-                        <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>글씨 크기</span><span data-tv="size"></span></div><input type="range" data-t="size" min="12" max="300" value="70"></div>
-                        <select data-t="font">${fontOpts('pretendard')}</select>
-                        <div class="row2">
-                            <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">글씨색</span><input type="color" data-t="color"></div>
-                            <div class="check-row" style="flex:0 0 auto;"><label><input type="checkbox" data-t="bold"> 볼드</label><label><input type="checkbox" data-t="italic"> 이탤릭</label><label><input type="checkbox" data-t="outline"> 테두리</label></div>
-                        </div>
-                        <button class="btn-sm" data-a="txdel" style="color:var(--danger);">선택한 글씨 지우기</button>
-                    </div>
-                    <p class="note" data-po-note></p>
-                </div>
-                <div class="row2"><button class="btn-sm" data-a="undo">↶ 실행 취소</button><button class="btn-sm" data-a="clear" style="color:var(--danger);">덮기 모두 지우기</button></div>
             </div>`;
         const cv = card.querySelector('canvas'), wrap = card.querySelector('.canvas-wrap');
         CARD[s.id] = { el: card, cv, wrap };
         bindCard(s, card, cv, wrap);
         syncCardInputs(s);
-        setTool(s, PUI[s.id].tool);
         return card;
     }
 
@@ -827,43 +893,7 @@
         el.querySelector('[data-v="scale"]').textContent = Math.round(s.scale * 100) + '%';
         el.querySelector('[data-v="rotate"]').textContent = s.rotate + '°';
         el.querySelector('[data-v="fontSize"]').textContent = s.fontSize + 'px';
-        const u = PUI[s.id];
-        el.querySelectorAll('[data-p]').forEach(inp => { const v = u[inp.dataset.p]; if (inp.type === 'checkbox') inp.checked = !!v; else inp.value = v; });
-        el.querySelector('[data-pv="size"]').textContent = u.size + 'px';
-        syncTextInputs(s);
-    }
-    function syncTextInputs(s) {
-        const el = CARD[s.id].el, u = PUI[s.id], src = u.sel || u.tx, sz = Math.round(u.sel ? u.sel.size * selK(s) : u.tx.size);
-        el.querySelectorAll('[data-t]').forEach(inp => { const k = inp.dataset.t, v = k === 'size' ? sz : src[k]; if (inp.type === 'checkbox') inp.checked = !!v; else inp.value = v; });
-        el.querySelector('[data-tv="size"]').textContent = sz + 'px';
-        el.querySelector('[data-a="txdel"]').style.display = u.sel ? '' : 'none';
-    }
-
-    function selK(s) { const { w, h } = sceneSize(s), b = imgBase(s, w, h); return b ? b.k : 1; }
-    function pruneText(s) { s.paint = s.paint.filter(o => o.t !== 'text' || o.text.trim()); }
-    const TOOL_NOTE = {
-        move: '그림을 끌어 옮기고, 휠이나 두 손가락으로 확대해요.',
-        pen: '지우고 싶은 부분을 칠해서 덮어요. 스포이드로 주변 색을 먼저 찍으면 자연스러워요.',
-        rect: '끌어서 사각형으로 덮어요. 채우기를 끄면 테두리만 그려요.',
-        ellipse: '끌어서 원으로 덮어요. 채우기를 끄면 테두리만 그려요.',
-        text: '글씨를 입력하고 그림을 누르면 배치돼요. 이미 넣은 글씨는 눌러서 고르고 끌어 옮겨요.',
-        pick: '그림을 누르면 그 자리 색이 덮기 색으로 들어가요.'
-    };
-    function setTool(s, t) {
-        const u = PUI[s.id], el = CARD[s.id].el, wrap = CARD[s.id].wrap;
-        u.tool = t; if (t !== 'text') { u.sel = null; pruneText(s); }
-        el.querySelectorAll('[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
-        const paint = t !== 'move';
-        el.querySelector('[data-po]').style.display = paint ? '' : 'none';
-        el.querySelector('[data-po-fill]').style.display = (t === 'rect' || t === 'ellipse') ? '' : 'none';
-        el.querySelector('[data-po-size]').style.display = (t === 'pen' || ((t === 'rect' || t === 'ellipse') && !u.fill)) ? '' : 'none';
-        el.querySelector('[data-po-text]').style.display = t === 'text' ? 'flex' : 'none';
-        el.querySelector('[data-po-note]').textContent = TOOL_NOTE[t];
-        wrap.classList.toggle('painting', paint && t !== 'pick');
-        wrap.classList.toggle('picking', t === 'pick');
-        el.querySelector('.canvas-hint').textContent = t === 'move' ? '드래그: 이동 · 휠 / 두 손가락: 확대' : '편집 중 — ' + TOOLS.find(x => x[0] === t)[1];
-        syncTextInputs(s);
-        drawSoon(s.id);
+        el.querySelector('[data-legacy]').style.display = s.paint.length ? '' : 'none';
     }
 
     function bindCard(s, card, cv, wrap) {
@@ -888,32 +918,9 @@
             try {
                 s.imgKey = await addImageFile(f);
                 Object.assign(s, { imgX: 0, imgY: 0, scale: 1, rotate: 0, paint: [] });
-                PUI[s.id].sel = null;
                 syncCardInputs(s); drawSoon(s.id); saveSoon(); MOT_API.refreshScenes();
             } catch (err) { toast('이미지를 열 수 없어요'); }
         });
-        // paint options
-        card.querySelectorAll('[data-p]').forEach(inp => {
-            inp.addEventListener(inp.type === 'checkbox' ? 'change' : 'input', () => {
-                const u = PUI[s.id], k = inp.dataset.p;
-                u[k] = inp.type === 'checkbox' ? inp.checked : inp.type === 'range' ? +inp.value : inp.value;
-                if (k === 'size') card.querySelector('[data-pv="size"]').textContent = u.size + 'px';
-                if (k === 'fill') setTool(s, u.tool);
-            });
-        });
-        card.querySelectorAll('[data-t]').forEach(inp => {
-            const ev = inp.type === 'checkbox' || inp.tagName === 'SELECT' ? 'change' : 'input';
-            inp.addEventListener(ev, () => {
-                const u = PUI[s.id], k = inp.dataset.t;
-                const v = inp.type === 'checkbox' ? inp.checked : inp.type === 'range' ? +inp.value : inp.value;
-                if (k !== 'text' || !u.sel) u.tx[k] = v; // 다음 글씨도 같은 스타일로 (크기는 화면 px)
-                if (u.sel) u.sel[k] = k === 'size' ? v / selK(s) : v; // 배치된 글씨 크기는 이미지 px
-                if (k === 'size') card.querySelector('[data-tv="size"]').textContent = v + 'px';
-                if (k === 'font') loadFont(v).then(() => drawSoon(s.id));
-                if (u.sel) { drawSoon(s.id); saveSoon(); }
-            });
-        });
-        card.querySelectorAll('[data-tool]').forEach(b => b.addEventListener('click', () => setTool(s, b.dataset.tool)));
         card.querySelector('.scene-acts').addEventListener('click', e => {
             const a = e.target.dataset.a; if (!a) return;
             if (a === 'up' || a === 'down') moveScene(s, a === 'up' ? -1 : 1);
@@ -922,49 +929,18 @@
         });
         card.querySelector('.s-panel').addEventListener('click', e => {
             const a = e.target.dataset.a; if (!a) return;
-            const u = PUI[s.id];
             if (a === 'fit') { Object.assign(s, { imgX: 0, imgY: 0, scale: 1, rotate: 0 }); syncCardInputs(s); drawSoon(s.id); saveSoon(); }
-            if (a === 'undo') { if (!s.paint.length) return toast('되돌릴 편집이 없어요'); const o = s.paint.pop(); if (o === u.sel) u.sel = null; syncTextInputs(s); drawSoon(s.id); saveSoon(); }
-            if (a === 'clear') { if (!s.paint.length) return; if (!confirm('이 컷의 덮기·글씨를 모두 지울까요?')) return; s.paint = []; u.sel = null; syncTextInputs(s); drawSoon(s.id); saveSoon(); }
-            if (a === 'txdel') { if (!u.sel) return; s.paint = s.paint.filter(o => o !== u.sel); u.sel = null; syncTextInputs(s); drawSoon(s.id); saveSoon(); }
+            if (a === 'clear') { if (!confirm('이 컷에 넣었던 덮기·글씨를 모두 지울까요?')) return; s.paint = []; syncCardInputs(s); drawSoon(s.id); saveSoon(); }
         });
 
-        // ── 캔버스 포인터 (마우스·터치·펜 공통) ──
+        // ── 캔버스 포인터: 끌어 이동 · 두 손가락 확대 ──
         const pts = new Map(); let act = null, pinch = null;
-        const toCv = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height, r }; };
         cv.addEventListener('pointerdown', e => {
-            const u = PUI[s.id];
+            if (!s.imgKey) return;
             pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
             try { cv.setPointerCapture(e.pointerId); } catch (_) {}
-            if (pts.size === 2 && u.tool === 'move') {
-                if (act && act.t === 'move') act = null;
-                const [a, b] = [...pts.values()];
-                pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, sc: s.scale };
-                return;
-            }
-            if (pts.size > 1) return;
-            const p = toCv(e), { w, h } = sceneSize(s);
-            if (u.tool === 'move') { if (!s.imgKey) return; act = { t: 'move', lx: e.clientX, ly: e.clientY }; return; }
-            if (u.tool === 'pick') {
-                const px = cv.getContext('2d').getImageData(clamp(Math.round(p.x), 0, cv.width - 1), clamp(Math.round(p.y), 0, cv.height - 1), 1, 1).data;
-                u.color = '#' + [px[0], px[1], px[2]].map(v => v.toString(16).padStart(2, '0')).join('');
-                card.querySelector('[data-p="color"]').value = u.color;
-                toast('덮기 색으로 가져왔어요 ' + u.color); setTool(s, 'pen'); return;
-            }
-            const q = toImg(s, w, h, p);
-            if (!q) { toast('먼저 배경 이미지를 넣어 주세요'); return; }
-            e.preventDefault();
-            if (u.tool === 'pen') { const o = { t: 'pen', color: u.color, w: u.size / q.k, pts: [[q.x, q.y]] }; s.paint.push(o); act = { t: 'pen', o }; }
-            else if (u.tool === 'rect' || u.tool === 'ellipse') { const o = { t: u.tool, color: u.color, fill: u.fill, lw: u.size / q.k, x: q.x, y: q.y, w: 0, h: 0 }; s.paint.push(o); act = { t: 'shape', o }; }
-            else if (u.tool === 'text') {
-                const hit = [...s.paint].reverse().find(o => { if (o.t !== 'text') return false; const b = textBox(o), m = 10 / q.k; return q.x >= b.x - m && q.x <= b.x + b.w + m && q.y >= b.y - m && q.y <= b.y + b.h + m; });
-                if (hit) { if (u.sel !== hit) pruneText(s); u.sel = hit; act = { t: 'tmove', o: hit, ox: q.x - hit.x, oy: q.y - hit.y }; syncTextInputs(s); drawSoon(s.id); return; }
-                if (u.sel) { pruneText(s); u.sel = null; syncTextInputs(s); drawSoon(s.id); saveSoon(); return; } // 선택 해제만
-                if (!u.tx.text.trim()) { u.sel = null; syncTextInputs(s); drawSoon(s.id); toast('넣을 글씨를 먼저 입력해 주세요'); card.querySelector('[data-t="text"]').focus(); return; }
-                const o = { t: 'text', ...u.tx, size: u.tx.size / q.k, x: q.x, y: q.y };
-                s.paint.push(o); u.sel = o; u.tx.text = ''; syncTextInputs(s);
-                drawSoon(s.id); saveSoon();
-            }
+            if (pts.size === 2) { act = null; const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, sc: s.scale }; return; }
+            if (pts.size === 1) act = { lx: e.clientX, ly: e.clientY };
         });
         cv.addEventListener('pointermove', e => {
             if (!pts.has(e.pointerId)) return;
@@ -975,28 +951,14 @@
                 syncCardInputs(s); drawSoon(s.id); return;
             }
             if (!act) return;
-            const p = toCv(e), { w, h } = sceneSize(s);
-            if (act.t === 'move') {
-                s.imgX += (e.clientX - act.lx) * cv.width / p.r.width; s.imgY += (e.clientY - act.ly) * cv.height / p.r.height;
-                act.lx = e.clientX; act.ly = e.clientY; drawSoon(s.id); return;
-            }
-            const q = toImg(s, w, h, p); if (!q) return;
-            if (act.t === 'pen') act.o.pts.push([q.x, q.y]);
-            else if (act.t === 'shape') { act.o.w = q.x - act.o.x; act.o.h = q.y - act.o.y; }
-            else if (act.t === 'tmove') { act.o.x = q.x - act.ox; act.o.y = q.y - act.oy; }
-            drawSoon(s.id);
+            const r = cv.getBoundingClientRect();
+            s.imgX += (e.clientX - act.lx) * cv.width / r.width; s.imgY += (e.clientY - act.ly) * cv.height / r.height;
+            act.lx = e.clientX; act.ly = e.clientY; drawSoon(s.id);
         });
-        const end = e => {
-            pts.delete(e.pointerId);
-            if (pts.size < 2) pinch = null;
-            if (act) {
-                if (act.t === 'shape' && Math.abs(act.o.w) < 2 && Math.abs(act.o.h) < 2) s.paint = s.paint.filter(o => o !== act.o);
-                act = null; drawSoon(s.id); saveSoon();
-            } else if (e.type === 'pointerup') saveSoon();
-        };
+        const end = e => { if (!pts.delete(e.pointerId)) return; if (pts.size < 2) pinch = null; if (!pts.size) { act = null; saveSoon(); } };
         cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
         wrap.addEventListener('wheel', e => {
-            if (!s.imgKey || PUI[s.id].tool !== 'move') return;
+            if (!s.imgKey) return;
             e.preventDefault();
             s.scale = clamp(s.scale * Math.exp(-e.deltaY * .0012), .1, 10);
             syncCardInputs(s); drawSoon(s.id); saveSoon();
@@ -1032,7 +994,7 @@
         if (SUB.scenes.length === 1) return;
         if (!confirm(`Scene ${sceneIdx(s) + 1}을(를) 삭제할까요?`)) return;
         SUB.scenes = SUB.scenes.filter(x => x !== s);
-        CARD[s.id].el.remove(); delete CARD[s.id]; delete PUI[s.id];
+        CARD[s.id].el.remove(); delete CARD[s.id];
         refreshCards(); saveSoon();
     }
 
@@ -1560,6 +1522,369 @@
     window.addEventListener('resize', () => { if (curMode === 'motion') motDraw(); });
 
     // ══════════════════════════════════
+    //  RETOUCH MODE — 원본 그대로 열어 덮기 · 글씨 넣기 → 원본 크기로 재저장
+    // ══════════════════════════════════
+    const RET = { imgKey: null, name: '', type: 'image/png', ops: [], fmt: 'same' };
+    const RU = { tool: 'select', color: '#000000', size: 20, fill: true, sel: null, zoom: 0, tx: { font: 'pretendard', size: 60, color: '#ffffff', bold: true, italic: false, outline: true, ocolor: '#000000' } };
+    const rcv = $('rtCanvas'), rctx = rcv.getContext('2d'), rview = $('rtView');
+    let rImg = null, rUndo = [], rRedo = [], rLastHist = 0;
+    const RT_MAXPX = 16.7e6;
+
+    function rtWork() { // 작업 해상도 (폰 캔버스 한계를 넘으면 줄임)
+        if (!rImg) return { w: 1280, h: 720, k: 1 };
+        const iw = rImg.naturalWidth, ih = rImg.naturalHeight, k = Math.min(1, Math.sqrt(RT_MAXPX / (iw * ih)));
+        return { w: Math.round(iw * k), h: Math.round(ih * k), k };
+    }
+    function rtHist(force) {
+        const now = performance.now();
+        if (!force && now - rLastHist < 700) return;
+        rLastHist = now;
+        rUndo.push(JSON.stringify(RET.ops)); if (rUndo.length > 60) rUndo.shift(); rRedo = [];
+        rtHistUI();
+    }
+    function rtHistUI() { $('rtUndo').disabled = !rUndo.length; $('rtRedo').disabled = !rRedo.length; }
+    function rtRestoreOps(json) { RET.ops = JSON.parse(json); RU.sel = null; rtPanel(); rtDraw(); saveSoon(); }
+    function rtUndo() { if (!rUndo.length) return; rRedo.push(JSON.stringify(RET.ops)); rtRestoreOps(rUndo.pop()); rtHistUI(); }
+    function rtRedoF() { if (!rRedo.length) return; rUndo.push(JSON.stringify(RET.ops)); rtRestoreOps(rRedo.pop()); rtHistUI(); }
+
+    // 도형 경계 (회전 전, 이미지 px)
+    function rtBox(o) {
+        if (o.t === 'pen') {
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            o.pts.forEach(p => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+            const m = o.w / 2; return { x: x0 - m, y: y0 - m, w: x1 - x0 + o.w, h: y1 - y0 + o.w };
+        }
+        if (o.t === 'text') return textBox(o);
+        const m = o.fill ? 0 : o.lw / 2;
+        return { x: Math.min(o.x, o.x + o.w) - m, y: Math.min(o.y, o.y + o.h) - m, w: Math.abs(o.w) + 2 * m, h: Math.abs(o.h) + 2 * m };
+    }
+    const rot = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a), dx = x - cx, dy = y - cy; return [cx + dx * c - dy * s, cy + dx * s + dy * c]; };
+    function rtCorners(o) { // [tl,tr,br,bl] 화면에 보이는 위치
+        const b = rtBox(o), a = o.t === 'text' ? (o.rot || 0) * Math.PI / 180 : 0, cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+        return [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]].map(p => rot(p[0], p[1], cx, cy, a));
+    }
+    function rtHit(o, x, y, m) {
+        const b = rtBox(o), cx = b.x + b.w / 2, cy = b.y + b.h / 2;
+        const [lx, ly] = o.t === 'text' ? rot(x, y, cx, cy, -(o.rot || 0) * Math.PI / 180) : [x, y];
+        return lx >= b.x - m && lx <= b.x + b.w + m && ly >= b.y - m && ly <= b.y + b.h + m;
+    }
+
+    function rtDrawOp(ctx, o) {
+        if (o.t !== 'text' || !o.rot) return drawPaintOp(ctx, o);
+        ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.rot * Math.PI / 180); drawPaintOp(ctx, { ...o, x: 0, y: 0 }); ctx.restore();
+    }
+    function rtRender(ctx, W, H, withSel) {
+        const k = W / (rImg ? rImg.naturalWidth : W);
+        ctx.clearRect(0, 0, W, H);
+        if (!rImg) return;
+        ctx.drawImage(rImg, 0, 0, W, H);
+        ctx.save(); ctx.scale(k, k);
+        RET.ops.forEach(o => rtDrawOp(ctx, o));
+        const o = withSel && RU.sel;
+        if (o) {
+            const px = rcv.width / Math.max(1, rcv.getBoundingClientRect().width) / k, c = rtCorners(o);
+            ctx.strokeStyle = '#C4A87C'; ctx.lineWidth = 1.5 * px; ctx.setLineDash([6 * px, 4 * px]);
+            ctx.beginPath(); c.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.stroke();
+            ctx.setLineDash([]);
+            const hs = (isTouch ? 8 : 6) * px;
+            c.forEach(p => { ctx.fillStyle = '#fff'; ctx.strokeStyle = '#8B7355'; ctx.lineWidth = 1.5 * px; ctx.beginPath(); ctx.rect(p[0] - hs, p[1] - hs, hs * 2, hs * 2); ctx.fill(); ctx.stroke(); });
+            if (o.t === 'text') {
+                const r = rtRotHandle(o, px);
+                ctx.strokeStyle = '#C4A87C'; ctx.lineWidth = 1.5 * px; ctx.beginPath(); ctx.moveTo(r.bx, r.by); ctx.lineTo(r.x, r.y); ctx.stroke();
+                ctx.fillStyle = '#C4A87C'; ctx.beginPath(); ctx.arc(r.x, r.y, hs, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        ctx.restore();
+    }
+    function rtRotHandle(o, px) {
+        const c = rtCorners(o), bx = (c[0][0] + c[1][0]) / 2, by = (c[0][1] + c[1][1]) / 2, a = (o.rot || 0) * Math.PI / 180, L = 28 * px;
+        return { bx, by, x: bx + Math.sin(a) * L, y: by - Math.cos(a) * L };
+    }
+    let rtRaf = 0;
+    function rtDraw() { if (!rtRaf) rtRaf = requestAnimationFrame(() => { rtRaf = 0; rtDrawNow(); }); }
+    function rtDrawNow() {
+        const { w, h } = rtWork();
+        if (rcv.width !== w) rcv.width = w; if (rcv.height !== h) rcv.height = h;
+        if (!rImg) { rctx.fillStyle = '#000'; rctx.fillRect(0, 0, w, h); rctx.fillStyle = '#5a5248'; rctx.font = '28px Pretendard,sans-serif'; rctx.textAlign = 'center'; rctx.textBaseline = 'middle'; rctx.fillText('고칠 이미지를 불러오세요 — 원본 크기 그대로 열려요', w / 2, h / 2); }
+        else rtRender(rctx, w, h, true);
+    }
+    function rtFit() {
+        const { w, h } = rtWork(), vw = rview.clientWidth - 24, vh = Math.max(240, rview.clientHeight - 24);
+        return Math.min(1, vw / w, vh / h);
+    }
+    function rtApplyZoom(z, cx, cy) {
+        const old = rcv.getBoundingClientRect(), vr = rview.getBoundingClientRect();
+        const fx = cx === undefined ? .5 : (cx - old.left) / old.width, fy = cy === undefined ? .5 : (cy - old.top) / old.height;
+        RU.zoom = z;
+        const { w } = rtWork(), zz = z || rtFit();
+        rcv.style.width = Math.round(w * zzClamp(zz)) + 'px';
+        $('rtZoomV').textContent = Math.round(zzClamp(zz) * rtWork().k * 100) + '%';
+        if (cx !== undefined) {
+            const nr = rcv.getBoundingClientRect();
+            rview.scrollLeft += (nr.left + fx * nr.width) - cx; rview.scrollTop += (nr.top + fy * nr.height) - cy;
+        } else if (!z) { rview.scrollLeft = 0; rview.scrollTop = 0; }
+        rtDraw();
+    }
+    const zzClamp = z => clamp(z, .05, 8);
+    const rtZoomCur = () => RU.zoom || rtFit();
+
+    // 도구 · 패널
+    const RT_NOTE = {
+        select: '눌러서 고르고 끌어 옮겨요. 네 모서리로 크기, 글씨 위 동그라미로 회전해요. 빈 곳을 끌면 화면이 움직여요.',
+        pen: '지우고 싶은 부분을 칠해서 덮어요. 스포이드로 주변 색을 먼저 찍으면 자연스러워요.',
+        rect: '끌어서 사각형으로 덮어요. 채우기를 끄면 테두리만 그려요.',
+        ellipse: '끌어서 원으로 덮어요. 채우기를 끄면 테두리만 그려요.',
+        text: '그림을 누르면 그 자리에 글씨가 생겨요. 내용은 오른쪽 칸에서 고쳐요.',
+        pick: '그림을 누르면 그 자리 색을 가져와요. 글씨를 고른 상태면 글씨색으로 들어가요.'
+    };
+    function rtSetTool(t) {
+        RU.tool = t;
+        if (t !== 'select' && t !== 'text' && t !== 'pick') rtSelect(null);
+        document.querySelectorAll('#rtTools [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+        rview.dataset.tool = t;
+        $('rtNote').textContent = RT_NOTE[t];
+        rtPanel();
+    }
+    function rtSelect(o) {
+        if (RU.sel && RU.sel !== o && RU.sel.t === 'text' && !RU.sel.text.trim()) RET.ops = RET.ops.filter(x => x !== RU.sel);
+        RU.sel = o; rtPanel(); rtDraw();
+    }
+    function rtPanel() {
+        const o = RU.sel, isText = (o && o.t === 'text') || (!o && RU.tool === 'text');
+        const shapeish = o ? o.t !== 'text' : ['pen', 'rect', 'ellipse', 'pick'].includes(RU.tool);
+        $('rtShapeBox').style.display = shapeish ? '' : 'none';
+        $('rtTextBox').style.display = isText ? 'flex' : 'none';
+        $('rtSelBox').style.display = o ? '' : 'none';
+        const col = o && o.t !== 'text' ? o.color : RU.color;
+        $('rtColor').value = col; $('rtColorHex').textContent = col;
+        const fill = o && (o.t === 'rect' || o.t === 'ellipse') ? o.fill : RU.fill;
+        $('rtFill').checked = fill;
+        $('rtFillRow').style.display = (o ? (o.t === 'rect' || o.t === 'ellipse') : (RU.tool === 'rect' || RU.tool === 'ellipse')) ? '' : 'none';
+        const sz = o ? (o.t === 'pen' ? o.w : o.t !== 'text' ? o.lw : RU.size) : RU.size;
+        $('rtSize').value = Math.round(sz); $('rtSizeV').textContent = Math.round(sz) + 'px';
+        $('rtSizeRow').style.display = (o ? (o.t === 'pen' || ((o.t === 'rect' || o.t === 'ellipse') && !o.fill)) : (RU.tool === 'pen' || ((RU.tool === 'rect' || RU.tool === 'ellipse') && !RU.fill))) ? '' : 'none';
+        const t = o && o.t === 'text' ? o : RU.tx;
+        $('rtText').value = o && o.t === 'text' ? o.text : '';
+        $('rtText').placeholder = o && o.t === 'text' ? '' : '그림을 눌러 글씨를 먼저 만드세요';
+        $('rtText').disabled = !(o && o.t === 'text');
+        $('rtTSize').value = Math.round(t.size); $('rtTSizeV').textContent = Math.round(t.size) + 'px';
+        $('rtTFont').value = t.font; $('rtTColor').value = t.color; $('rtTBold').checked = t.bold; $('rtTItalic').checked = t.italic;
+        $('rtTOutline').checked = t.outline; $('rtTOColor').value = t.ocolor || '#000000';
+        $('rtTRot').value = Math.round(o && o.t === 'text' ? o.rot || 0 : 0); $('rtTRotV').textContent = $('rtTRot').value + '°';
+        $('rtTRotRow').style.display = o && o.t === 'text' ? '' : 'none';
+        const max = rImg ? Math.max(300, Math.round(Math.max(rImg.naturalWidth, rImg.naturalHeight) / 3)) : 400;
+        $('rtTSize').max = max; $('rtSize').max = Math.max(200, Math.round(max / 2));
+    }
+
+    function rtPt(e) { const r = rcv.getBoundingClientRect(), { k } = rtWork(); return { x: (e.clientX - r.left) * rcv.width / r.width / k, y: (e.clientY - r.top) * rcv.height / r.height / k, px: rcv.width / r.width / k }; }
+    function rtNorm(o) { if (o.t === 'rect' || o.t === 'ellipse') { if (o.w < 0) { o.x += o.w; o.w = -o.w; } if (o.h < 0) { o.y += o.h; o.h = -o.h; } } }
+
+    (() => {
+        const pts = new Map(); let act = null, pinch = null;
+        rcv.addEventListener('pointerdown', e => {
+            pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            try { rcv.setPointerCapture(e.pointerId); } catch (_) {}
+            if (pts.size === 2) { // 두 손가락: 화면 확대 + 이동
+                if (act && (act.t === 'pen' || act.t === 'shape')) { RET.ops = RET.ops.filter(x => x !== act.o); rUndo.pop(); rtHistUI(); rtDraw(); } // 두 번째 손가락 → 그리던 선 취소
+                act = null;
+                const [a, b] = [...pts.values()];
+                pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: rtZoomCur(), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
+                return;
+            }
+            if (pts.size > 1 || !rImg) return;
+            e.preventDefault();
+            const p = rtPt(e), t = RU.tool;
+            if (t === 'pick') {
+                const { w, h, k } = rtWork(), c = document.createElement('canvas'); c.width = 1; c.height = 1;
+                const cc = c.getContext('2d'); cc.translate(-p.x * k, -p.y * k); rtRender(cc, w, h, false);
+                const d = cc.getImageData(0, 0, 1, 1).data, hex = '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+                if (RU.sel && RU.sel.t === 'text') { rtHist(true); RU.sel.color = hex; RU.tx.color = hex; toast('글씨색으로 가져왔어요 ' + hex); rtPanel(); rtDraw(); saveSoon(); }
+                else if (RU.sel) { rtHist(true); RU.sel.color = hex; RU.color = hex; toast('색을 바꿨어요 ' + hex); rtPanel(); rtDraw(); saveSoon(); }
+                else { RU.color = hex; toast('덮기 색으로 가져왔어요 ' + hex); rtSetTool('pen'); }
+                return;
+            }
+            if (t === 'select' || t === 'text') {
+                const o = RU.sel, hsz = (isTouch ? 20 : 10) * p.px;
+                if (o) { // 핸들 먼저
+                    if (o.t === 'text') { const r = rtRotHandle(o, p.px); if (Math.hypot(p.x - r.x, p.y - r.y) < hsz * 1.4) { rtHist(true); act = { t: 'rot', o }; return; } }
+                    const c = rtCorners(o), i = c.findIndex(q => Math.abs(p.x - q[0]) < hsz && Math.abs(p.y - q[1]) < hsz);
+                    if (i >= 0) { rtHist(true); act = { t: 'resize', o, i, snap: JSON.parse(JSON.stringify(o)), box: rtBox(o), sx: p.x, sy: p.y }; return; }
+                }
+                const hit = [...RET.ops].reverse().find(q => (t === 'select' || q.t === 'text') && rtHit(q, p.x, p.y, 4 * p.px));
+                if (hit) { rtSelect(hit); rtHist(true); act = { t: 'move', o: hit, lx: p.x, ly: p.y }; return; }
+                if (t === 'text') {
+                    if (RU.sel) { rtSelect(null); return; }
+                    rtHist(true);
+                    const o2 = { t: 'text', text: '텍스트', ...RU.tx, x: p.x, y: p.y, rot: 0 };
+                    RET.ops.push(o2); rtSelect(o2); saveSoon();
+                    if (!isTouch) setTimeout(() => { const ta = $('rtText'); ta.focus({ preventScroll: true }); ta.select(); }, 30);
+                    return;
+                }
+                rtSelect(null);
+                act = { t: 'pan', lx: e.clientX, ly: e.clientY };
+                return;
+            }
+            rtHist(true);
+            if (t === 'pen') { const o = { t: 'pen', color: RU.color, w: RU.size, pts: [[p.x, p.y]] }; RET.ops.push(o); act = { t: 'pen', o }; }
+            else { const o = { t, color: RU.color, fill: RU.fill, lw: RU.size, x: p.x, y: p.y, w: 0, h: 0 }; RET.ops.push(o); act = { t: 'shape', o }; }
+            rtDraw();
+        });
+        rcv.addEventListener('pointermove', e => {
+            if (!pts.has(e.pointerId)) return;
+            pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            if (pinch && pts.size >= 2) {
+                const [a, b] = [...pts.values()], cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+                rtApplyZoom(zzClamp(pinch.z * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d), cx, cy);
+                rview.scrollLeft -= cx - pinch.cx; rview.scrollTop -= cy - pinch.cy; pinch.cx = cx; pinch.cy = cy;
+                return;
+            }
+            if (!act) return;
+            const p = rtPt(e), o = act.o;
+            if (act.t === 'pan') { rview.scrollLeft -= e.clientX - act.lx; rview.scrollTop -= e.clientY - act.ly; act.lx = e.clientX; act.ly = e.clientY; return; }
+            if (act.t === 'pen') o.pts.push([p.x, p.y]);
+            else if (act.t === 'shape') { o.w = p.x - o.x; o.h = p.y - o.y; if (e.shiftKey) { const m = Math.max(Math.abs(o.w), Math.abs(o.h)); o.w = Math.sign(o.w || 1) * m; o.h = Math.sign(o.h || 1) * m; } }
+            else if (act.t === 'move') {
+                const dx = p.x - act.lx, dy = p.y - act.ly; act.lx = p.x; act.ly = p.y;
+                if (o.t === 'pen') o.pts.forEach(q => { q[0] += dx; q[1] += dy; }); else { o.x += dx; o.y += dy; }
+            }
+            else if (act.t === 'rot') { let a = Math.atan2(p.x - o.x, -(p.y - o.y)) * 180 / Math.PI; if (Math.abs(a) < 3) a = 0; o.rot = Math.round(a * 10) / 10; rtPanel(); }
+            else if (act.t === 'resize') {
+                const s = act.snap, b = act.box;
+                if (o.t === 'text') {
+                    const d0 = Math.hypot(act.sx - s.x, act.sy - s.y) || 1, d1 = Math.hypot(p.x - s.x, p.y - s.y);
+                    o.size = Math.max(6, s.size * d1 / d0); rtPanel();
+                } else {
+                    const opp = [[b.x + b.w, b.y + b.h], [b.x, b.y + b.h], [b.x, b.y], [b.x + b.w, b.y]][act.i];
+                    let sx = (p.x - opp[0]) / ((act.i === 0 || act.i === 3 ? b.x : b.x + b.w) - opp[0] || 1);
+                    let sy = (p.y - opp[1]) / ((act.i < 2 ? b.y : b.y + b.h) - opp[1] || 1);
+                    if (e.shiftKey || o.t === 'pen' && !e.altKey) { const m = Math.max(Math.abs(sx), Math.abs(sy)); sx = Math.sign(sx || 1) * m; sy = Math.sign(sy || 1) * m; }
+                    if (o.t === 'pen') o.pts = s.pts.map(q => [opp[0] + (q[0] - opp[0]) * sx, opp[1] + (q[1] - opp[1]) * sy]);
+                    else { o.x = opp[0] + (s.x - opp[0]) * sx; o.y = opp[1] + (s.y - opp[1]) * sy; o.w = s.w * sx; o.h = s.h * sy; }
+                }
+            }
+            rtDraw();
+        });
+        const end = e => {
+            if (!pts.delete(e.pointerId)) return;
+            if (pts.size < 2) pinch = null;
+            if (pts.size) return;
+            if (act) {
+                const o = act.o;
+                if (act.t === 'shape') { rtNorm(o); if (o.w < 2 && o.h < 2) { RET.ops = RET.ops.filter(x => x !== o); rUndo.pop(); rtHistUI(); } }
+                if (act.t === 'resize') rtNorm(o);
+                if (act.t !== 'pan') saveSoon();
+                act = null; rtPanel(); rtDraw();
+            }
+        };
+        rcv.addEventListener('pointerup', end); rcv.addEventListener('pointercancel', end);
+        rcv.addEventListener('dblclick', e => { const p = rtPt(e), hit = [...RET.ops].reverse().find(q => q.t === 'text' && rtHit(q, p.x, p.y, 4 * p.px)); if (hit) { rtSelect(hit); $('rtText').focus({ preventScroll: true }); } });
+        rview.addEventListener('wheel', e => {
+            if (!rImg || !(e.ctrlKey || e.metaKey || e.altKey)) return; // 그냥 휠은 스크롤, Ctrl+휠은 확대
+            e.preventDefault(); rtApplyZoom(zzClamp(rtZoomCur() * Math.exp(-e.deltaY * .0015)), e.clientX, e.clientY);
+        }, { passive: false });
+    })();
+
+    // 패널 입력
+    const rtOn = (id, ev, fn) => $(id).addEventListener(ev, fn);
+    document.querySelectorAll('#rtTools [data-tool]').forEach(b => b.addEventListener('click', () => rtSetTool(b.dataset.tool)));
+    rtOn('rtColor', 'input', e => { const v = e.target.value; $('rtColorHex').textContent = v; if (RU.sel && RU.sel.t !== 'text') { rtHist(); RU.sel.color = v; rtDraw(); saveSoon(); } else RU.color = v; });
+    rtOn('rtFill', 'change', e => { if (RU.sel && (RU.sel.t === 'rect' || RU.sel.t === 'ellipse')) { rtHist(true); RU.sel.fill = e.target.checked; rtDraw(); saveSoon(); } else RU.fill = e.target.checked; rtPanel(); });
+    rtOn('rtSize', 'input', e => { const v = +e.target.value; $('rtSizeV').textContent = v + 'px'; const o = RU.sel; if (o && o.t === 'pen') { rtHist(); o.w = v; rtDraw(); saveSoon(); } else if (o && o.t !== 'text') { rtHist(); o.lw = v; rtDraw(); saveSoon(); } else RU.size = v; });
+    const rtT = (id, key, ev, conv) => rtOn(id, ev, e => {
+        const v = conv(e.target); RU.tx[key] = v;
+        if (key === 'size') $('rtTSizeV').textContent = v + 'px';
+        if (key === 'font') loadFont(v).then(rtDraw);
+        if (RU.sel && RU.sel.t === 'text') { rtHist(); RU.sel[key] = v; rtDraw(); saveSoon(); }
+    });
+    rtT('rtTSize', 'size', 'input', t => +t.value);
+    rtT('rtTFont', 'font', 'change', t => t.value);
+    rtT('rtTColor', 'color', 'input', t => t.value);
+    rtT('rtTOColor', 'ocolor', 'input', t => t.value);
+    rtT('rtTBold', 'bold', 'change', t => t.checked);
+    rtT('rtTItalic', 'italic', 'change', t => t.checked);
+    rtT('rtTOutline', 'outline', 'change', t => t.checked);
+    rtOn('rtText', 'input', e => { if (RU.sel && RU.sel.t === 'text') { rtHist(); RU.sel.text = e.target.value; rtDraw(); saveSoon(); } });
+    rtOn('rtTRot', 'input', e => { $('rtTRotV').textContent = e.target.value + '°'; if (RU.sel && RU.sel.t === 'text') { rtHist(); RU.sel.rot = +e.target.value; rtDraw(); saveSoon(); } });
+    rtOn('rtDel', 'click', () => { if (!RU.sel) return; rtHist(true); RET.ops = RET.ops.filter(o => o !== RU.sel); RU.sel = null; rtPanel(); rtDraw(); saveSoon(); });
+    rtOn('rtDup', 'click', () => { if (!RU.sel) return; rtHist(true); const o = JSON.parse(JSON.stringify(RU.sel)), d = 20 * rcv.width / Math.max(1, rcv.getBoundingClientRect().width) / rtWork().k; if (o.t === 'pen') o.pts.forEach(q => { q[0] += d; q[1] += d; }); else { o.x += d; o.y += d; } RET.ops.push(o); rtSelect(o); saveSoon(); });
+    rtOn('rtFront', 'click', () => { if (!RU.sel) return; rtHist(true); RET.ops = RET.ops.filter(o => o !== RU.sel).concat(RU.sel); rtDraw(); saveSoon(); });
+    rtOn('rtBack', 'click', () => { if (!RU.sel) return; rtHist(true); RET.ops = [RU.sel].concat(RET.ops.filter(o => o !== RU.sel)); rtDraw(); saveSoon(); });
+    rtOn('rtUndo', 'click', rtUndo); rtOn('rtRedo', 'click', rtRedoF);
+    rtOn('rtClear', 'click', () => { if (!RET.ops.length) return; if (!confirm('덮기·글씨를 모두 지울까요? (원본 그림은 그대로예요)')) return; rtHist(true); RET.ops = []; RU.sel = null; rtPanel(); rtDraw(); saveSoon(); });
+    rtOn('rtZoomOut', 'click', () => rtApplyZoom(zzClamp(rtZoomCur() / 1.25)));
+    rtOn('rtZoomIn', 'click', () => rtApplyZoom(zzClamp(rtZoomCur() * 1.25)));
+    rtOn('rtZoomFit', 'click', () => rtApplyZoom(0));
+    rtOn('rtZoom100', 'click', () => rtApplyZoom(1 / rtWork().k));
+    rtOn('rtFmt', 'change', e => { RET.fmt = e.target.value; saveSoon(); });
+    window.addEventListener('resize', () => { if (curMode === 'retouch' && !RU.zoom) rtApplyZoom(0); });
+    document.addEventListener('keydown', e => {
+        if (curMode !== 'retouch') return;
+        const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement && document.activeElement.tagName);
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); e.shiftKey ? rtRedoF() : rtUndo(); return; }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && !typing) { e.preventDefault(); rtRedoF(); return; }
+        if (typing || !RU.sel) return;
+        if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); $('rtDel').click(); }
+        const mv = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        if (mv) { e.preventDefault(); rtHist(); const d = e.shiftKey ? 10 : 1, o = RU.sel; if (o.t === 'pen') o.pts.forEach(q => { q[0] += mv[0] * d; q[1] += mv[1] * d; }); else { o.x += mv[0] * d; o.y += mv[1] * d; } rtDraw(); saveSoon(); }
+        if (e.key === 'Escape') rtSelect(null);
+    });
+
+    async function rtOpen(file) {
+        try {
+            if (RET.ops.length && !confirm('지금 작업 중인 덮기·글씨는 사라져요. 새 이미지를 열까요?')) return;
+            const key = await addImageFile(file);
+            Object.assign(RET, { imgKey: key, name: file.name.replace(/\.[^.]+$/, ''), type: file.type || 'image/png', ops: [] });
+            rUndo = []; rRedo = []; rtHistUI();
+            await rtLoadImg();
+            RU.size = Math.max(6, Math.round(Math.max(rImg.naturalWidth, rImg.naturalHeight) / 60));
+            RU.tx.size = Math.max(16, Math.round(Math.max(rImg.naturalWidth, rImg.naturalHeight) / 18));
+            rtSelect(null); rtApplyZoom(0); saveSoon();
+        } catch (e) { toast('이미지를 열 수 없어요'); }
+    }
+    async function rtLoadImg() {
+        rImg = null;
+        if (RET.imgKey) { await ensureImg(RET.imgKey); rImg = IMG.get(RET.imgKey) || null; if (!rImg) RET.imgKey = null; }
+        const { w, h, k } = rtWork();
+        $('rtInfo').textContent = rImg ? `원본 ${rImg.naturalWidth}×${rImg.naturalHeight}px · ${(RET.type.split('/')[1] || 'png').toUpperCase()}${k < 1 ? ` · 폰 한계로 ${w}×${h}에서 작업` : ''}` : '';
+        $('rtSave').disabled = $('rtToSub').disabled = !rImg;
+        rtPanel(); rtDrawNow();
+    }
+    rtOn('rtFile', 'change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) rtOpen(f); });
+    rview.addEventListener('dragover', e => { e.preventDefault(); });
+    rview.addEventListener('drop', e => { e.preventDefault(); const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) rtOpen(f); });
+
+    async function rtResult() {
+        await fontsReady;
+        const { w, h } = rtWork(), c = document.createElement('canvas'); c.width = w; c.height = h;
+        rtRender(c.getContext('2d'), w, h, false);
+        const f = RET.fmt === 'same' ? RET.type : RET.fmt;
+        const type = /jpe?g/.test(f) ? 'image/jpeg' : /webp/.test(f) ? 'image/webp' : 'image/png';
+        const blob = await canvasBlob(c, type, .95);
+        return { blob, ext: type === 'image/jpeg' ? 'jpg' : type.split('/')[1] };
+    }
+    rtOn('rtSave', 'click', async () => {
+        if (!rImg) return; rtSelect(null);
+        const { blob, ext } = await rtResult();
+        if (!blob) return toast('저장하지 못했어요');
+        await saveBlob(blob, `${RET.name || 'ARCH'}_retouch.${ext}`);
+    });
+    rtOn('rtToSub', 'click', async () => {
+        if (!rImg) return; rtSelect(null);
+        const { blob, ext } = await rtResult();
+        const s = addScene();
+        s.imgKey = await addImageFile(new File([blob], `${RET.name || 'retouch'}.${ext}`, { type: blob.type }));
+        syncCardInputs(s); drawSoon(s.id); saveSoon(); MOT_API.refreshScenes();
+        setMode('subtitle'); setTimeout(() => CARD[s.id].el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+        toast(`자막 모드 Scene ${SUB.scenes.length}으로 보냈어요`);
+    });
+
+    const RET_API = {
+        async onShow() { if (!RU.zoom) rtApplyZoom(0); else rtDraw(); },
+        async restore(st) { if (st) Object.assign(RET, st); $('rtFmt').value = RET.fmt; await rtLoadImg(); rtSetTool('select'); rtHistUI(); }
+    };
+    $('rtTFont').innerHTML = fontOpts('pretendard');
+
+    // ══════════════════════════════════
     //  저장 / 복원
     // ══════════════════════════════════
     function serialize() {
@@ -1567,7 +1892,8 @@
             v: 2, mode: curMode,
             sub: { fmt: SUB.fmt, bar: SUB.bar, trim: SUB.trim, scenes: SUB.scenes.map(s => ({ ...s, paint: s.paint.map(o => ({ ...o, pts: o.pts ? o.pts.map(p => [p[0], p[1]]) : undefined })) })) },
             col: { ...colState, images: colState.images.map(it => ({ key: it.key, name: it.name, scale: it.scale, rotate: it.rotate, ox: it.ox, oy: it.oy })) },
-            mot: { ...MOT, keys: MOT.keys.map(k => ({ ...k })) }
+            mot: { ...MOT, keys: MOT.keys.map(k => ({ ...k })) },
+            ret: { imgKey: RET.imgKey, name: RET.name, type: RET.type, fmt: RET.fmt, ops: JSON.parse(JSON.stringify(RET.ops)) }
         };
     }
     async function restore() {
@@ -1578,7 +1904,7 @@
             SUB.scenes = (st.sub.scenes || []).map(s => ({ ...newScene(false), ...s, paint: s.paint || [] }));
             const col = st.col || {};
             Object.assign(colState, col, { images: [] });
-            const keys = new Set([...SUB.scenes.map(s => s.imgKey), ...(col.images || []).map(i => i.key), st.mot && st.mot.imgKey].filter(Boolean));
+            const keys = new Set([...SUB.scenes.map(s => s.imgKey), ...(col.images || []).map(i => i.key), st.mot && st.mot.imgKey, st.ret && st.ret.imgKey].filter(Boolean));
             await Promise.all([...keys].map(ensureImg));
             SUB.scenes.forEach(s => { if (s.imgKey && !IMG.has(s.imgKey)) s.imgKey = null; });
             colState.images = (col.images || []).filter(i => IMG.has(i.key)).map(mkColItem);
@@ -1593,13 +1919,14 @@
         applyFmtUI(); refreshCards();
         colSyncGlobal(); colRenderList(); colDraw();
         MOT_API.refreshScenes(); motSyncUI(); await motSetSource();
+        await RET_API.restore(st && st.v === 2 ? st.ret : null);
         restoring = false;
         setMode(st && st.mode ? st.mode : 'subtitle');
         fontsReady.then(() => { drawSoon('*'); if (MOT.scene) motSetSource(); });
     }
 
     $('btnReset').addEventListener('click', async () => {
-        if (!confirm('모든 컷·콜라주·모션 작업을 지우고 새로 시작할까요?\n(이 기기에 저장된 작업도 지워져요)')) return;
+        if (!confirm('모든 컷·콜라주·모션·리터칭 작업을 지우고 새로 시작할까요?\n(이 기기에 저장된 작업도 지워져요)')) return;
         restoring = true; clearTimeout(saveT);
         try { await DB.clearAll(); } catch (e) {}
         location.reload();
