@@ -1,0 +1,17 @@
+{
+  "name": "Arch Cinema Editor",
+  "short_name": "Arch Cinema",
+  "description": "자막 컷 · 콜라주 · 카메라 모션 GIF 편집기",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#E8DFD0",
+  "theme_color": "#E8DFD0",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
