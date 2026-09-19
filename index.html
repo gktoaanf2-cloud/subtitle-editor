@@ -332,6 +332,13 @@
         .sheet-bg{background:rgba(200,210,222,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
 
         @media(min-width:1101px){.s-panel{padding-top:54px;}}
+        .consent-bg{z-index:9500;align-items:center;padding:16px;}
+        .consent{width:min(460px,100%);padding:30px 26px 26px;}
+        .consent h3{margin-bottom:10px;}
+        .consent-p{font-size:.84rem;line-height:1.8;color:var(--tx);margin-bottom:10px;word-break:keep-all;}
+        .consent-chk{display:flex;gap:8px;align-items:flex-start;margin-top:18px;padding:12px 14px;font-size:.8rem;line-height:1.6;cursor:pointer;background:rgba(232,237,242,.85);box-shadow:inset 2px 2px 5px var(--sh-lo),inset -2px -2px 5px var(--sh-hi);word-break:keep-all;}
+        .consent-chk input{margin-top:4px;width:15px;height:15px;flex-shrink:0;}
+        body.consent-open{overflow:hidden;}
         /* ── mobile ── */
         @media(max-width:640px){
             .site-header{padding:calc(26px + env(safe-area-inset-top)) 14px 14px;}
@@ -711,6 +718,16 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="sheet-bg consent-bg" id="consent">
+    <div class="sheet consent" role="dialog" aria-modal="true" aria-labelledby="consentT">
+        <h3 id="consentT">이용 전 확인</h3>
+        <div class="dia" style="margin:0 0 14px;"></div>
+        <p class="consent-p">AI 채팅을 위한 사이트임을 인지하고 있습니다.</p>
+        <p class="consent-p">해당 사이트를 이용한 AI 생성물은 반드시 트위터 이미지 표기시, AI 생성물임을 표기하고 사용하겠습니다.</p>
+        <label class="consent-chk"><input type="checkbox" id="consentChk"> 해당 경고문을 이해하였으며, 동의합니다.</label>
+        <button class="btn btn-p" id="consentOk" disabled>동의하고 시작하기</button>
+    </div>
+</div>
 <div class="sheet-bg" id="iosSheet">
     <div class="sheet">
         <h3>홈 화면에 추가</h3>
@@ -2176,6 +2193,21 @@
     });
     window.addEventListener('appinstalled', () => { $('btnInstall').hidden = true; toast('홈 화면에 추가됐어요'); });
     if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+    // 최초 접속 동의
+    (() => {
+        const KEY = 'arch_consent_v1';
+        let ok = false; try { ok = localStorage.getItem(KEY) === '1'; } catch (e) {}
+        if (ok) return;
+        const bg = $('consent'), chk = $('consentChk'), btn = $('consentOk');
+        bg.classList.add('on'); document.body.classList.add('consent-open');
+        chk.addEventListener('change', () => { btn.disabled = !chk.checked; });
+        btn.addEventListener('click', () => {
+            if (!chk.checked) return;
+            try { localStorage.setItem(KEY, '1'); } catch (e) {}
+            bg.classList.remove('on'); document.body.classList.remove('consent-open');
+        });
+    })();
 
     restore();
 })();
