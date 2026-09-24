@@ -390,6 +390,37 @@
             .mot-view{min-height:0;padding:16px 8px 8px;}
             .mot-tl{padding:6px 10px 14px;}
         }
+            /* ── 촬영 스튜디오 v3 ── */
+        body.mot-easy #area-motion .adv{display:none!important;}
+        .mot-ui{margin-bottom:16px;}
+        .omk{width:100%;margin:8px 0 10px;padding:12px 10px;letter-spacing:3px;}
+        .look-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+        .look-card{position:relative;text-align:left;padding:9px 9px 9px 14px;border:1px solid var(--bdr-l);background:var(--panel2);cursor:pointer;font-family:inherit;color:var(--tx);display:flex;flex-direction:column;gap:3px;overflow:hidden;transition:border-color .15s,transform .15s,box-shadow .15s;min-height:52px;}
+        .look-card b{font-size:.74rem;font-weight:700;letter-spacing:.5px;}
+        .look-card span{font-size:.6rem;color:var(--tx-m);line-height:1.4;}
+        .look-sw{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--l1),var(--l2));}
+        .look-card:hover{border-color:var(--bdr);transform:translateY(-1px);}
+        .look-card.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc);}
+        .look-card.on b::after{content:'';display:inline-block;width:5px;height:5px;background:var(--acc);transform:rotate(45deg);margin-left:6px;vertical-align:2px;}
+        .tr-grid,.cap-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+        .cap-gal{grid-template-columns:1fr 1fr;margin:6px 0 8px;}
+        .tr-h{grid-column:1/-1;font-size:.6rem;color:var(--tx-l);letter-spacing:2px;margin-top:6px;}
+        .tr-cell,.cap-cell{padding:0;border:1px solid var(--bdr-l);background:#0b0d11;cursor:pointer;display:flex;flex-direction:column;font-family:inherit;min-width:0;transition:border-color .12s,box-shadow .12s;}
+        .tr-cell canvas,.cap-cell canvas{width:100%;height:auto;display:block;aspect-ratio:16/9;}
+        .tr-cell span,.cap-cell span{font-size:.6rem;padding:4px 2px;background:var(--panel2);color:var(--tx-m);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .tr-cell:hover,.cap-cell:hover{border-color:var(--acc-g);}
+        .tr-cell.on,.cap-cell.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc);}
+        .tr-cell.on span,.cap-cell.on span{color:var(--acc);font-weight:700;}
+        .clip-opts{display:flex;gap:4px;margin-top:4px;}
+        .clip-opts select{flex:1;min-width:0;font-size:.6rem;padding:3px 4px;}
+        .cap-quick{flex-wrap:wrap;}
+        .cap-row-style{width:100%;font-size:.62rem;padding:3px 5px;margin:4px 0;}
+        label.mini{display:flex;flex-direction:column;gap:3px;font-size:.6rem;color:var(--tx-m);flex:1;min-width:0;}
+        label.mini select{width:100%;min-width:0;}
+        .cap-adv{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+        #capBulk{width:100%;resize:vertical;font-family:inherit;font-size:.74rem;}
+        @media (max-width:560px){.tr-grid{grid-template-columns:repeat(3,1fr);}.look-card span{display:none;}}
+
     </style>
 </head>
 <body>
@@ -638,7 +669,7 @@
                     <div class="tl-track" id="motTrack"><div class="tl-head" id="motHead"></div></div>
                     <span class="tl-time" id="motTime">0.00 / 4.00s</span>
                 </div>
-                <div class="tl-btns">
+                <div class="tl-btns adv">
                     <button class="btn-sm" id="motPrev">◀ 이전 키</button>
                     <button class="btn-sm" id="motAddKey">◆ 키프레임 추가</button>
                     <button class="btn-sm" id="motDelKey">키 삭제</button>
@@ -647,6 +678,7 @@
             </div>
         </div>
         <div class="col-panel">
+            <div class="seg mot-ui" id="motUi"><button data-v="easy">간편하게</button><button data-v="pro">세세하게</button></div>
             <div class="section-head">장면 (사진)</div>
             <div class="clip-list" id="clipList"></div>
             <div class="strip-actions">
@@ -654,29 +686,6 @@
             </div>
             <select id="motScene"></select>
             <button class="btn-sm" id="clipMovie">자막 모드 컷 전부 → 영화처럼 이어 붙이기</button>
-            <div id="motTransBox" style="display:none;">
-                <div class="ctrl" style="margin:6px 0 8px;">
-                    <div class="ctrl-label"><span>장면 전환</span></div>
-                    <select id="motTrans">
-                        <option value="cut">컷 (바로)</option>
-                        <option value="fade">크로스페이드</option>
-                        <option value="black">암전 (영화)</option>
-                        <option value="white">화이트 플래시</option>
-                        <option value="blur">블러 디졸브</option>
-                        <option value="slide">슬라이드</option>
-                        <option value="zoom">줌 스루</option>
-                        <option value="spin">스핀 (음방)</option>
-                        <option value="glitch">글리치</option>
-                        <option value="iris">원형 열기</option>
-                        <option value="up">위로 밀기</option>
-                        <option value="blinds">블라인드</option>
-                        <option value="flash">줌 플래시</option>
-                    </select>
-                </div>
-                <div class="ctrl"><div class="ctrl-label"><span>전환 길이</span><span id="motTransDV"></span></div><input type="range" id="motTransD" min="0.2" max="2" step="0.1" value="0.6"></div>
-                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>카메라 움직임</span></div>
-                    <div class="seg" id="motCamMode"><button data-v="each">장면마다 반복</button><button data-v="all">전체에 한 번</button></div></div>
-            </div>
             <div class="ctrl">
                 <div class="ctrl-label"><span>화면 비율</span></div>
                 <select id="motRatio">
@@ -693,9 +702,28 @@
             </div>
 
             <div class="sep"><div class="dia"></div></div>
+            <div class="section-head">원클릭 연출</div>
+            <p class="note">사진만 넣고 하나 고르면 카메라 · 장면 전환 · 효과 · 자막 스타일이 한 번에 맞춰져요.</p>
+            <button class="btn btn-p omk" id="motOmk">✦ 알아서 연출하기</button>
+            <div class="look-grid" id="lookGrid"></div>
+
+            <div class="sep"><div class="dia"></div></div>
+            <div class="section-head">장면 전환</div>
+            <p class="note" id="trNote">사진을 2장 이상 넣으면 장면 사이에 전환이 생겨요. 지금은 내 사진으로 미리 볼 수 있어요.</p>
+            <p class="note">마우스를 올리면 움직여요. 누르면 모든 장면 사이에 들어가고, 장면마다 따로 고를 수도 있어요.</p>
+            <div class="tr-grid" id="trGrid"></div>
+            <div id="trMore">
+                <div class="ctrl" style="margin-top:10px;"><div class="ctrl-label"><span>전환 길이</span><span id="motTransDV"></span></div><input type="range" id="motTransD" min="0.2" max="2" step="0.1" value="0.6"></div>
+                <div class="ctrl adv" style="margin:0;"><div class="ctrl-label"><span>카메라 움직임</span></div>
+                    <div class="seg" id="motCamMode"><button data-v="each">장면마다 반복</button><button data-v="all">전체에 한 번</button></div></div>
+            </div>
+
+            <div class="sep"><div class="dia"></div></div>
             <div class="section-head">카메라 프리셋</div>
+            <div id="presetTgtRow" style="margin-bottom:6px;"><div class="seg" id="presetTgt"><button data-v="all" class="on">모든 장면에</button><button data-v="clip">지금 장면만</button></div></div>
             <div class="preset-grid" id="motPresets"></div>
 
+            <div class="adv">
             <div class="sep"><div class="dia"></div></div>
             <div class="section-head">지금 시간의 카메라</div>
             <div class="ctrl">
@@ -715,6 +743,7 @@
                 <select id="mkE"><option value="io">부드럽게</option><option value="out">빠르게 → 느리게</option><option value="in">느리게 → 빠르게</option><option value="lin">일정하게</option></select>
             </div>
             <div class="strip-actions"><button class="btn-sm" id="mkCenter">가운데로</button></div>
+            </div>
 
             <div class="sep"><div class="dia"></div></div>
             <div class="section-head">모션 효과</div>
@@ -724,6 +753,7 @@
 
             <div class="sep"><div class="dia"></div></div>
             <div class="section-head">카메라 · 화면</div>
+            <div class="adv">
             <div class="ctrl">
                 <div class="ctrl-label"><span>모션 블러</span><span id="motMbV">40%</span></div>
                 <input type="range" id="motMb" min="0" max="100" value="40">
@@ -731,6 +761,7 @@
             <div class="ctrl">
                 <div class="ctrl-label"><span>카메라 흔들림 (핸드헬드)</span><span id="motShV">0%</span></div>
                 <input type="range" id="motSh" min="0" max="100" value="0">
+            </div>
             </div>
             <div class="ctrl">
                 <div class="ctrl-label"><span>카메라 레이아웃</span></div>
@@ -785,19 +816,30 @@
 
             <div class="sep"><div class="dia"></div></div>
             <div class="section-head">자막</div>
-            <p class="note">자막마다 나오는 시간(초)을 정해요. 구간을 나누면 장면마다 다른 자막이 나와요. 타임라인 아래 막대가 자막 구간이에요.</p>
+            <p class="note">스타일을 고르고 글만 적으면 끝이에요. 마우스를 올리면 움직임을 미리 볼 수 있어요.</p>
+            <div class="cap-gal" id="capGal"></div>
+            <div class="strip-actions cap-quick"><button class="btn-sm" id="capAdd">＋ 지금 시간에</button><button class="btn-sm" id="capPerClip">장면마다 한 줄씩</button><button class="btn-sm" id="capBulkBtn">한꺼번에 입력</button></div>
+            <div id="capBulkBox" style="display:none;margin-bottom:8px;">
+                <textarea id="capBulk" rows="4" placeholder="한 줄에 자막 하나씩 적어요 — 한 자막 안에서 줄을 바꾸려면 / 를 넣어요"></textarea>
+                <p class="note">줄 수가 장면 수와 같으면 장면마다 하나씩, 아니면 영상 길이에 고르게 나눠요.</p>
+                <div class="strip-actions"><button class="btn-sm on" id="capBulkGo">자막 만들기</button></div>
+            </div>
             <div class="cap-list" id="capList"></div>
-            <div class="strip-actions"><button class="btn-sm" id="capAdd">＋ 지금 시간에 자막 추가</button></div>
             <div class="cap-style">
                 <div class="row2">
                     <select id="capFont"></select>
-                    <select id="capFx" style="flex:0 0 108px;"><option value="none">효과 없음</option><option value="fade">페이드</option><option value="type">타자</option></select>
+                    <div class="check-row" style="flex:0 0 auto;"><label><input type="checkbox" id="capBold" checked> 굵게</label></div>
                 </div>
-                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>크기</span><span id="capSizeV"></span></div><input type="range" id="capSize" min="12" max="90" value="34"></div>
-                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>아래에서 위치</span><span id="capYV"></span></div><input type="range" id="capY" min="2" max="80" value="8"></div>
+                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>크기</span><span id="capSizeV"></span></div><input type="range" id="capSize" min="12" max="120" value="34"></div>
+                <div class="ctrl" style="margin:0;" id="capYRow"><div class="ctrl-label"><span id="capYL">아래에서 위치</span><span id="capYV"></span></div><input type="range" id="capY" min="2" max="80" value="8"></div>
                 <div class="row2">
-                    <div class="color-pick" style="flex:0 0 auto;"><span style="font-size:.67rem;">색</span><input type="color" id="capColor" value="#ffffff"></div>
-                    <div class="check-row" style="flex:0 0 auto;"><label><input type="checkbox" id="capBold" checked> 볼드</label><label><input type="checkbox" id="capOutline" checked> 테두리</label></div>
+                    <div class="color-pick"><span style="font-size:.67rem;">글자</span><input type="color" id="capColor" value="#ffffff"></div>
+                    <div class="color-pick"><span style="font-size:.67rem;">포인트</span><input type="color" id="capAccent" value="#ffd24a"></div>
+                </div>
+                <div class="adv cap-adv">
+                    <div class="row2"><label class="mini">배치<select id="capLayout"></select></label><label class="mini">꾸밈<select id="capTreat"></select></label></div>
+                    <div class="row2"><label class="mini">나타날 때<select id="capEnter"></select></label><label class="mini">사라질 때<select id="capExit"></select></label></div>
+                    <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>움직임 속도</span><span id="capSpeedV"></span></div><input type="range" id="capSpeed" min="0.5" max="2" step="0.1" value="1"></div>
                 </div>
             </div>
 
@@ -809,14 +851,18 @@
                 <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>GIF 초당 프레임</span></div>
                     <select id="motFps"><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="25">25</option></select></div>
             </div>
-            <div class="ctrl" style="margin:8px 0 0;"><div class="ctrl-label"><span>영상 화질 (30fps)</span></div>
-                <select id="motVQ"><option value="720">720p</option><option value="1080" selected>1080p · Full HD</option></select></div>
+            <div class="row2" style="margin-top:8px;">
+                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>영상 화질</span></div>
+                    <select id="motVQ"><option value="720">720p</option><option value="1080" selected>1080p · Full HD</option></select></div>
+                <div class="ctrl" style="margin:0;"><div class="ctrl-label"><span>영상 초당 프레임</span></div>
+                    <select id="motVfps"><option value="30" selected>30 (기본)</option><option value="60">60 (부드럽게)</option><option value="24">24 (영화)</option></select></div>
+            </div>
             <div class="exp-row">
                 <button class="btn btn-p" id="motGif">GIF 저장</button>
                 <button class="btn" id="motVid">영상 저장</button>
             </div>
             <div class="prog" id="motProg"><i></i></div>
-            <p class="note" id="motNote">GIF는 크기·길이·프레임이 클수록 용량이 커져요(720px · 4초 · 15fps 무난). 영상은 실제 길이만큼 녹화되니 녹화 중엔 이 화면을 켜 두세요 — 음악은 영상에만 들어가요.</p>
+            <p class="note" id="motNote">GIF는 크기·길이·프레임이 클수록 용량이 커져요(720px · 4초 · 15fps 무난). 영상은 한 장면씩 계산해서 MP4로 만들어 효과가 많아도 끊기지 않아요 — 음악은 영상에만 들어가요.</p>
         </div>
     </div>
 </div>
@@ -968,7 +1014,7 @@
         const jobs = [];
         try {
             SUB.scenes.forEach(sc => { const d = eff(sc); jobs.push(fontText(d.fontFamily, sc.text)); (sc.paint || []).forEach(o => o.t === 'text' && jobs.push(fontText(o.font, o.text))); });
-            MOT.subs.forEach(x => jobs.push(fontText(MOT.cap.font, x.text)));
+            MOT.subs.forEach(x => { const st = x.style && typeof CAP_STYLES !== 'undefined' && CAP_STYLES[x.style], f = (st && st.font) || MOT.cap.font; if (f !== MOT.cap.font) loadFont(f); jobs.push(fontText(f, x.text)); });
             RET.ops.forEach(o => o.t === 'text' && jobs.push(fontText(o.font, o.text)));
         } catch (e) {}
         return Promise.all(jobs).then(r => r.some(Boolean));
@@ -1533,9 +1579,9 @@
     const MOT = {
         clips: [], camMode: 'each', trans: 'fade', transDur: .6,
         pt: 'none', pd: 50, pcol: '#ffe7c2', ovA: '', ovB: '', ovC: '',
-        fx: [], fxAmt: 50, mus: null, vq: '1080',
+        fx: [], fxAmt: 50, mus: null, vq: '1080', vfps: 30, seed: 0, look: '',
         ratio: '16:9', dur: 4, fps: 15, outW: 720, mb: 40, shake: 0, ov: 'none', grain: false,
-        subs: [], cap: { font: 'pretendard', size: 34, color: '#ffffff', bold: true, outline: true, y: 8, fx: 'fade' },
+        subs: [], cap: { font: 'pretendard', size: 34, color: '#ffffff', bold: true, outline: true, y: 8, fx: 'fade', accent: '#ffd24a', layout: 'bottom', treat: 'outline', enter: 'fade', exit: 'fade', speed: 1, style: '' },
         keys: [{ t: 0, z: 1, x: 0, y: 0, r: 0, b: 0 }, { t: 1, z: 1.3, x: 0, y: 0, r: 0, b: 0 }]
     };
     let motT = 0, motPlaying = false, motRaf = 0;
@@ -1583,16 +1629,20 @@
     $('motPresets').addEventListener('click', e => {
         const n = e.target.dataset.p; if (!n) return;
         const P = PRESETS[n];
-        MOT.keys = P.k.map(k => ({ t: k.t, z: k.z ?? 1, x: k.x ?? 0, y: k.y ?? 0, r: k.r ?? 0, b: k.b ?? 0, e: k.e || 'io' }));
-        MOT.shake = P.sh || 0;
-        if (P.ratio) MOT.ratio = P.ratio;
-        if (P.ov) { MOT.ov = P.ov; toast('세로 9:16 + 직캠 틀로 바꿨어요'); }
+        if (presetTgt === 'clip' && MOT.clips.length > 1) {
+            const ci = ciNow(); MOT.camMode = 'each'; setClipCam(MOT.clips[ci], n);
+            toast(`장면 ${ci + 1}에만 「${n}」을 넣었어요`);
+        } else {
+            MOT.keys = presetKeys(n); MOT.shake = P.sh || 0;
+            MOT.clips.forEach(c => setClipCam(c, ''));
+            if (P.ratio) MOT.ratio = P.ratio;
+            if (P.ov) { MOT.ov = P.ov; toast('세로 9:16 + 직캠 틀로 바꿨어요'); }
+        }
         document.querySelectorAll('#motPresets .filter-chip').forEach(c => c.classList.toggle('active', c === e.target));
         motSyncUI(); motPlay(true); saveSoon();
     });
 
-    function motSample(tf) { // tf: 0..1
-        const K = MOT.keys;
+    function motSample(tf, K = MOT.keys) { // tf: 0..1
         if (!K.length) return { z: 1, x: 0, y: 0, r: 0, b: 0 };
         if (tf <= K[0].t) return { ...K[0] };
         if (tf >= K[K.length - 1].t) return { ...K[K.length - 1] };
@@ -1600,9 +1650,9 @@
         const a = K[i], b = K[i + 1], u = (EASE[a.e] || ease)((tf - a.t) / Math.max(1e-6, b.t - a.t));
         return { z: Math.exp(Math.log(a.z) + (Math.log(b.z) - Math.log(a.z)) * u), x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u, r: a.r + (b.r - a.r) * u, b: a.b + (b.b - a.b) * u };
     }
-    function motShake(tf) {
-        if (!MOT.shake) return { x: 0, y: 0, r: 0 };
-        const A = MOT.shake / 100, T = 2 * Math.PI * tf; // 정수 주기 → GIF가 끊김 없이 반복
+    function motShake(tf, amt = MOT.shake) {
+        if (!amt) return { x: 0, y: 0, r: 0 };
+        const A = amt / 100, T = 2 * Math.PI * tf; // 정수 주기 → GIF가 끊김 없이 반복
         return {
             x: A * .018 * (Math.sin(T * 2 + 1) * .6 + Math.sin(T * 5) * .3 + Math.sin(T * 9 + 2) * .1),
             y: A * .018 * (Math.sin(T * 3 + 2) * .6 + Math.sin(T * 7 + 1) * .3 + Math.sin(T * 11) * .1),
@@ -1625,7 +1675,7 @@
     function camTf(t) { if (!eachMode()) return clamp(t / MOT.dur, 0, 1); const c = clipAt(t); return clamp(c.lt / MOT.clips[c.i].dur, 0, 1); }
     function camState(i, lt, gt) {
         const tf = eachMode() ? clamp(lt / MOT.clips[i].dur, 0, 1) : clamp(gt / MOT.dur, 0, 1);
-        const s = motSample(tf), j = motShake(tf), f = fxCam(gt);
+        const s = motSample(tf, keysRef(i)), j = motShake(tf, shakeFor(i)), f = fxCam(gt);
         return { ...s, z: s.z * f.z, x: s.x + j.x + f.x, y: s.y + j.y + f.y, r: s.r + j.r + f.r };
     }
     const motReady = () => MOT.clips.some(c => CLIPSRC.has(c.id));
@@ -1693,10 +1743,10 @@
     function drawXf(ctx, img, W, H, sc, rot, alpha, dx = 0, dy = 0) {
         ctx.save(); ctx.globalAlpha = alpha; ctx.translate(W / 2 + dx, H / 2 + dy); ctx.rotate(rot); ctx.scale(sc, sc); ctx.drawImage(img, -W / 2, -H / 2, W, H); ctx.restore();
     }
-    function transComp(ctx, W, H, A, B, p) {
+    function transComp(ctx, W, H, A, B, p, kind = MOT.trans, idx = 0) {
         const e = ease(p);
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-        switch (MOT.trans) {
+        switch (kind) {
             case 'fade': ctx.drawImage(A, 0, 0); drawXf(ctx, B, W, H, 1, 0, e); break;
             case 'black': {
                 if (p < .5) { ctx.drawImage(A, 0, 0); ctx.fillStyle = `rgba(0,0,0,${EASE.io(p * 2)})`; }
@@ -1733,7 +1783,9 @@
                 drawXf(ctx, p < .5 ? A : B, W, H, sc, 0, 1);
                 ctx.fillStyle = `rgba(255,255,255,${Math.pow(1 - Math.abs(p - .5) * 2, 2)})`; ctx.fillRect(0, 0, W, H); break;
             }
-            default: ctx.drawImage(p < .5 ? A : B, 0, 0);
+            default:
+                if (typeof transComp2 === 'function' && transComp2(kind, ctx, W, H, A, B, p, TR_ENV(idx))) break;
+                ctx.drawImage(p < .5 ? A : B, 0, 0);
         }
     }
 
@@ -1829,18 +1881,18 @@
         if (!MOT.clips.length) return;
         const n = MOT.clips.length, c = clipAt(tSec);
         let pair = null;
-        if (n > 1 && MOT.trans !== 'cut') {
+        if (n > 1) {
             const T = Math.min(MOT.transDur, ...MOT.clips.map(x => x.dur * .9));
             const end = c.t0 + MOT.clips[c.i].dur;
-            if (c.i < n - 1 && tSec > end - T / 2) pair = [c.i, c.i + 1, (tSec - (end - T / 2)) / T];
-            else if (c.i > 0 && tSec < c.t0 + T / 2) pair = [c.i - 1, c.i, (tSec - (c.t0 - T / 2)) / T];
+            if (c.i < n - 1 && tSec > end - T / 2 && transFor(c.i) !== 'cut') pair = [c.i, c.i + 1, (tSec - (end - T / 2)) / T];
+            else if (c.i > 0 && tSec < c.t0 + T / 2 && transFor(c.i - 1) !== 'cut') pair = [c.i - 1, c.i, (tSec - (c.t0 - T / 2)) / T];
         }
         if (pair) {
             clA.width = clB.width = W; clA.height = clB.height = H;
             const [ia, ib, p] = pair;
             renderClip(clA.getContext('2d'), W, H, ia, tSec - clipStart(ia), tSec, quality);
             renderClip(clB.getContext('2d'), W, H, ib, tSec - clipStart(ib), tSec, quality);
-            transComp(ctx, W, H, clA, clB, clamp(p, 0, 1));
+            transComp(ctx, W, H, clA, clB, clamp(p, 0, 1), transFor(ia), ia);
         } else renderClip(ctx, W, H, c.i, c.lt, tSec, quality);
         fxPost(ctx, W, H, tSec);
         if (MOT.grain) { ctx.save(); ctx.fillStyle = ctx.createPattern(noiseC, 'repeat'); ctx.fillRect(0, 0, W, H); ctx.restore(); }
@@ -1849,6 +1901,12 @@
         drawCaps(ctx, W, H, tSec);
     }
     function drawCaps(ctx, W, H, t) {
+        if (typeof drawCaps2 !== 'function') return drawCapsOld(ctx, W, H, t);
+        const on = MOT.subs.filter(s => s.text.trim() && t >= s.t0 && t < Math.min(s.t1, MOT.dur + .001));
+        if (!on.length) return;
+        drawCaps2(ctx, W, H, t, on.map(s => ({ s: { t0: s.t0, t1: Math.min(s.t1, MOT.dur + .001), text: s.text }, L: capLook(MOT.cap, s.style || '') })), CAP_ENV);
+    }
+    function drawCapsOld(ctx, W, H, t) {
         const c = MOT.cap, on = MOT.subs.filter(s => s.text.trim() && t >= s.t0 && t < Math.min(s.t1, MOT.dur + .001));
         if (!on.length) return;
         const fs = c.size * W / 960, lh = fs * 1.3;
@@ -1953,17 +2011,18 @@
     }
     // 키프레임 — 「장면마다」면 각 장면 안의 비율, 「전체」면 전체 비율
     function keyEps() { const d = eachMode() ? MOT.clips[clipAt(motT).i].dur : MOT.dur; return .5 / (d * 30); }
-    function curKey() { const tf = camTf(motT), eps = keyEps(); return MOT.keys.find(k => Math.abs(k.t - tf) < eps) || null; }
+    function curKey() { const tf = camTf(motT), eps = keyEps(); return keysRef(ciNow()).find(k => Math.abs(k.t - tf) < eps) || null; }
     function editKey() { // 지금 시간의 키 (없으면 새로 만듦)
+        const cc = eachMode() && MOT.clips[ciNow()]; if (cc && cc.keys) cc.cam = '*';
         let k = curKey(); if (k) return k;
-        const tf = camTf(motT), s = motSample(tf);
-        const prev = [...MOT.keys].reverse().find(q => q.t < tf);
+        const K = keysRef(ciNow()), tf = camTf(motT), s = motSample(tf, K);
+        const prev = [...K].reverse().find(q => q.t < tf);
         k = { ...s, t: tf, e: prev ? prev.e || 'io' : 'io' };
-        MOT.keys.push(k); MOT.keys.sort((a, b) => a.t - b.t); return k;
+        K.push(k); K.sort((a, b) => a.t - b.t); return k;
     }
     function keyTimes() { // 타임라인에 보이는 모든 키 위치(초)
         if (!eachMode()) return MOT.keys.map(k => ({ k, t: k.t * MOT.dur }));
-        const out = []; MOT.clips.forEach((c, i) => { const s0 = clipStart(i); MOT.keys.forEach(k => out.push({ k, t: s0 + k.t * c.dur, i })); }); return out;
+        const out = []; MOT.clips.forEach((c, i) => { const s0 = clipStart(i); keysRef(i).forEach(k => out.push({ k, t: s0 + k.t * c.dur, i })); }); return out;
     }
     function motTrackUI() {
         const tr = $('motTrack'), ck = curKey(), ci = MOT.clips.length ? clipAt(motT).i : 0;
@@ -1978,22 +2037,23 @@
         document.querySelectorAll('#clipList .clip-row').forEach((r, i) => r.classList.toggle('on', i === ci && MOT.clips.length > 1));
         $('motHead').style.left = (motT / MOT.dur * 100) + '%';
         $('motTime').textContent = (MOT.clips.length > 1 ? `장면 ${ci + 1} · ` : '') + motT.toFixed(2) + ' / ' + MOT.dur.toFixed(2) + 's';
-        const s = motSample(camTf(motT));
+        const s = motSample(camTf(motT), keysRef(ci));
         $('mkZ').value = Math.round(s.z * 100); $('mkZV').textContent = Math.round(s.z * 100) + '%';
         $('mkR').value = s.r; $('mkRV').textContent = s.r.toFixed(1) + '°';
         $('mkB').value = s.b; $('mkBV').textContent = s.b.toFixed(1);
-        const prevK = [...MOT.keys].reverse().find(q => q.t <= camTf(motT) + 1e-6);
+        const prevK = [...keysRef(ci)].reverse().find(q => q.t <= camTf(motT) + 1e-6);
         $('mkE').value = prevK ? prevK.e || 'io' : 'io';
-        $('motDelKey').disabled = !ck || MOT.keys.length <= 1;
+        $('motDelKey').disabled = !ck || keysRef(ci).length <= 1;
     }
     function motSyncUI() {
         if (!MOT.clips) MOT.clips = [];
         if (!MOT.cap || !MOT.subs) { MOT.subs = MOT.subs || []; MOT.cap = { font: 'pretendard', size: 34, color: '#ffffff', bold: true, outline: true, y: 8, fx: 'fade', ...(MOT.cap || {}) }; }
+        capMigrate();
         motRecalc();
         $('motRatio').value = MOT.ratio; $('motDur').value = MOT.dur; $('motDurV').textContent = MOT.dur.toFixed(1) + 's';
         $('motDurRow').style.display = MOT.clips.length > 1 ? 'none' : '';
-        $('motTransBox').style.display = MOT.clips.length > 1 ? '' : 'none';
-        $('motTrans').value = MOT.trans; $('motTransD').value = MOT.transDur; $('motTransDV').textContent = MOT.transDur.toFixed(1) + 's';
+        $('presetTgtRow').style.display = MOT.clips.length > 1 ? '' : 'none';
+        $('motTransD').value = MOT.transDur; $('motTransDV').textContent = MOT.transDur.toFixed(1) + 's';
         document.querySelectorAll('#motCamMode button').forEach(b => b.classList.toggle('on', b.dataset.v === MOT.camMode));
         $('motFps').value = MOT.fps; $('motW').value = MOT.outW;
         $('motMb').value = MOT.mb; $('motMbV').textContent = MOT.mb + '%';
@@ -2006,8 +2066,8 @@
         $('motPtOpts').style.display = MOT.pt === 'none' ? 'none' : '';
         $('motPcolRow').style.display = ['bokeh', 'sparkle', 'dust', 'leak'].includes(MOT.pt) ? '' : 'none';
         if (!Array.isArray(MOT.fx)) MOT.fx = [];
-        fxUI(); musUI(); $('motVQ').value = MOT.vq || '1080';
-        capStyleUI(); capListUI(); clipListUI();
+        fxUI(); musUI(); $('motVQ').value = MOT.vq || '1080'; $('motVfps').value = MOT.vfps || 30;
+        capStyleUI(); capListUI(); clipListUI(); lookUI(); trUI(); capGalUI();
         motT = clamp(motT, 0, MOT.dur); motDraw();
     }
     function motPlay(on) {
@@ -2033,7 +2093,7 @@
         tr.addEventListener('pointerup', () => dn = false); tr.addEventListener('pointercancel', () => dn = false);
     })();
     $('motAddKey').addEventListener('click', () => { motPlay(false); editKey(); motDraw(); saveSoon(); });
-    $('motDelKey').addEventListener('click', () => { const k = curKey(); if (!k || MOT.keys.length <= 1) return; MOT.keys = MOT.keys.filter(x => x !== k); motDraw(); saveSoon(); });
+    $('motDelKey').addEventListener('click', () => { const k = curKey(), K = keysRef(ciNow()); if (!k || K.length <= 1) return; K.splice(K.indexOf(k), 1); motDraw(); saveSoon(); });
     $('motPrev').addEventListener('click', () => { motPlay(false); const o = keyTimes().filter(o => o.t < motT - 1e-3).sort((a, b) => b.t - a.t)[0]; motT = o ? o.t : 0; motDraw(); });
     $('motNext').addEventListener('click', () => { motPlay(false); const o = keyTimes().filter(o => o.t > motT + 1e-3).sort((a, b) => a.t - b.t)[0]; motT = o ? o.t : MOT.dur; motDraw(); });
     $('mkZ').addEventListener('input', e => { motPlay(false); editKey().z = +e.target.value / 100; motDraw(); saveSoon(); });
@@ -2079,7 +2139,6 @@
     motSet('motPt', 'change', t => MOT.pt = t.value);
     $('motPd').addEventListener('input', e => { MOT.pd = +e.target.value; $('motPdV').textContent = MOT.pd + '%'; motDraw(); saveSoon(); });
     $('motPcol').addEventListener('input', e => { MOT.pcol = e.target.value; motDraw(); saveSoon(); });
-    motSet('motTrans', 'change', t => MOT.trans = t.value);
     $('motTransD').addEventListener('input', e => { MOT.transDur = +e.target.value; $('motTransDV').textContent = MOT.transDur.toFixed(1) + 's'; motDraw(); saveSoon(); });
     $('motCamMode').addEventListener('click', e => { const v = e.target.dataset.v; if (!v) return; MOT.camMode = v; motSyncUI(); saveSoon(); });
 
@@ -2106,17 +2165,23 @@
         if (c.k === 'scene') { const s = sceneById(c.sid), n = s ? sceneIdx(s) + 1 : '?'; return `자막 Scene ${n}${s && s.imgKey ? '' : ' (없음)'}`; }
         return c.name || `사진 ${i + 1}`;
     }
+    function camOpts() { return '<option value="">카메라: 공통</option><option value="*" hidden>카메라: 직접 편집</option>' + ['기본', '영상', '음방 · 직캠'].map(g => `<optgroup label="${g}">` + Object.keys(PRESETS).filter(n => presetGroup(n) === g).map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('') + '</optgroup>').join(''); }
+    function trOpts() { return '<option value="">다음 전환: 공통</option><option value="mix">다음 전환: 자동 섞기</option>' + TR_GROUPS.map(g => `<optgroup label="${g}">` + TRANS_ALL().filter(t => (t[3] || '기본') === g).map(t => `<option value="${t[0]}">→ ${esc(t[1])}</option>`).join('') + '</optgroup>').join(''); }
     function clipListUI() {
         const L = $('clipList');
         if (!MOT.clips.length) { L.innerHTML = '<div class="col-empty" style="padding:14px 0;">사진을 추가하세요 — 여러 장이면 차례로 전환돼요</div>'; return; }
-        const many = MOT.clips.length > 1;
+        const many = MOT.clips.length > 1, co = many ? camOpts() : '', to = many ? trOpts() : '';
         L.innerHTML = MOT.clips.map((c, i) => `<div class="clip-row" data-i="${i}">
             <canvas class="clip-th" width="72" height="44"></canvas>
             <div class="clip-mid"><div class="clip-name">${String(i + 1).padStart(2, '0')} · ${esc(clipName(c, i))}</div>
-                ${many ? `<div class="cap-t"><input type="number" data-f="dur" step="0.1" min="0.3" inputmode="decimal" value="${Math.round(c.dur * 10) / 10}"> 초</div>` : ''}</div>
+                ${many ? `<div class="cap-t"><input type="number" data-f="dur" step="0.1" min="0.3" inputmode="decimal" value="${Math.round(c.dur * 10) / 10}"> 초</div>
+                <div class="clip-opts"><select data-f="cam" title="이 장면의 카메라">${co}</select>${i < MOT.clips.length - 1 ? `<select data-f="tr" title="다음 장면으로 넘어갈 때">${to}</select>` : ''}</div>` : ''}</div>
             <div class="clip-acts"><button data-a="dup" title="이 장면 복제">복제</button><button data-a="up" ${i ? '' : 'disabled'}>▲</button><button data-a="down" ${i < MOT.clips.length - 1 ? '' : 'disabled'}>▼</button><button data-a="del" class="x">✕</button></div></div>`).join('');
         L.querySelectorAll('.clip-row').forEach((r, i) => {
-            const S = CLIPSRC.get(MOT.clips[i].id), cv = r.querySelector('canvas'), x = cv.getContext('2d');
+            const c = MOT.clips[i], cs = r.querySelector('[data-f=cam]'), ts = r.querySelector('[data-f=tr]');
+            if (cs) cs.value = c.cam && (c.cam === '*' || PRESETS[c.cam]) ? c.cam : '';
+            if (ts) ts.value = c.tr || '';
+            const S = CLIPSRC.get(c.id), cv = r.querySelector('canvas'), x = cv.getContext('2d');
             x.fillStyle = '#dfe5ec'; x.fillRect(0, 0, 72, 44);
             if (S) { const k = Math.max(72 / S.base.width, 44 / S.base.height); x.drawImage(S.base, (72 - S.base.width * k) / 2, (44 - S.base.height * k) / 2, S.base.width * k, S.base.height * k); if (S.top) { const k2 = Math.max(72 / S.top.width, 44 / S.top.height); x.drawImage(S.top, (72 - S.top.width * k2) / 2, (44 - S.top.height * k2) / 2, S.top.width * k2, S.top.height * k2); } }
         });
@@ -2137,9 +2202,11 @@
         motSyncUI(); saveSoon();
     });
     $('clipList').addEventListener('change', e => {
-        if (e.target.dataset.f !== 'dur') return;
-        const i = +e.target.closest('.clip-row').dataset.i, v = parseFloat(e.target.value);
-        if (!isNaN(v)) MOT.clips[i].dur = clamp(v, .3, 60);
+        const f = e.target.dataset.f; if (!f) return;
+        const i = +e.target.closest('.clip-row').dataset.i, c = MOT.clips[i];
+        if (f === 'dur') { const v = parseFloat(e.target.value); if (!isNaN(v)) c.dur = clamp(v, .3, 60); }
+        if (f === 'cam') { if (e.target.value === '*') return; setClipCam(c, e.target.value); if (e.target.value) MOT.camMode = 'each'; motSyncUI(); motT = clipStart(i) + .01; motPlay(true); saveSoon(); return; }
+        if (f === 'tr') { if (e.target.value) c.tr = e.target.value; else delete c.tr; if (!MOT.seed) MOT.seed = (Math.random() * 1e6) | 0; motSyncUI(); motT = Math.max(0, clipStart(i + 1) - MOT.transDur - .3); motPlay(true); saveSoon(); return; }
         motSyncUI(); saveSoon();
     });
     function newClip(o) {
@@ -2391,6 +2458,23 @@
     }
     async function exportVid() {
         if (!motReady()) return toast('먼저 사진을 추가해 주세요');
+        if (busy) return;
+        if (window.VideoEncoder && window.VideoFrame) {
+            busy = true; motPlay(false); musListenStop();
+            const btn = $('motVid'); btn.disabled = true; $('motGif').disabled = true; let ok = false;
+            try {
+                await fontsReady; await fontTextAll();
+                const r = await exportVidWC(btn);
+                $('motNote').textContent = `영상 ${r.W}×${r.H} · ${MOT.dur.toFixed(1)}초 · ${r.fps}fps · MP4${r.withMus ? ' · 음악 포함' : ''} · ${(r.blob.size / 1048576).toFixed(1)}MB`;
+                await saveBlob(r.blob, 'ARCH_STUDIO.mp4'); ok = true;
+            } catch (e) { console.warn('frame export failed → realtime', e); }
+            finally { busy = false; btn.disabled = false; $('motGif').disabled = false; btn.textContent = '영상 저장'; prog(null); }
+            if (ok) return;
+            toast('이 브라우저에선 실시간 녹화로 저장할게요 — 화면을 켜 두세요');
+        }
+        return exportVidRT();
+    }
+    async function exportVidRT() {
         if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) return toast('이 브라우저는 영상 저장을 지원하지 않아요 — GIF를 써 주세요');
         if (busy) return; busy = true; motPlay(false); musListenStop();
         const btn = $('motVid'); btn.disabled = true; $('motGif').disabled = true;
@@ -2445,16 +2529,19 @@
     }
     $('motVid').addEventListener('click', exportVid);
     $('motVQ').addEventListener('change', e => { MOT.vq = e.target.value; saveSoon(); });
+    $('motVfps').addEventListener('change', e => { MOT.vfps = +e.target.value; saveSoon(); });
 
     // ── GIF 자막 ──
     const r1 = v => Math.round(v * 10) / 10;
     function capListUI() {
         const L = $('capList');
         if (!MOT.subs.length) { L.innerHTML = '<div class="col-empty" style="padding:14px 0;">아직 자막이 없어요</div>'; motTrackUI(); return; }
+        const capRowOpts = typeof CAP_STYLES !== 'undefined' ? '<option value="">스타일: 전체와 같게</option>' + Object.entries(CAP_STYLES).map(([k, v]) => `<option value="${k}">스타일: ${esc(v.name || k)}</option>`).join('') : '';
         L.innerHTML = MOT.subs.map((s, i) => `<div class="cap-row" data-i="${i}">
             <div class="cap-t"><input type="number" data-f="t0" step="0.1" min="0" inputmode="decimal"> ~ <input type="number" data-f="t1" step="0.1" min="0" inputmode="decimal"> 초<span class="sp"></span><button data-a="here" title="지금 시간부터 시작">◆ 지금부터</button><button data-a="del" class="x" title="삭제">✕</button></div>
+            ${typeof CAP_STYLES !== 'undefined' ? `<select data-f="style" class="cap-row-style" title="이 자막만 다른 스타일로">${capRowOpts}</select>` : ''}
             <textarea data-f="text" placeholder="자막 내용 (줄바꿈 가능)"></textarea></div>`).join('');
-        L.querySelectorAll('.cap-row').forEach((r, i) => { const s = MOT.subs[i]; r.querySelector('[data-f=t0]').value = r1(s.t0); r.querySelector('[data-f=t1]').value = r1(s.t1); r.querySelector('[data-f=text]').value = s.text; });
+        L.querySelectorAll('.cap-row').forEach((r, i) => { const s = MOT.subs[i]; r.querySelector('[data-f=t0]').value = r1(s.t0); r.querySelector('[data-f=t1]').value = r1(s.t1); r.querySelector('[data-f=text]').value = s.text; const ss = r.querySelector('[data-f=style]'); if (ss) ss.value = s.style || ''; });
         motTrackUI();
     }
     function capSort() { MOT.subs.sort((a, b) => a.t0 - b.t0); }
@@ -2471,6 +2558,7 @@
         const row = e.target.closest('.cap-row'); if (!row) return;
         const s = MOT.subs[+row.dataset.i], f = e.target.dataset.f; if (!s || !f) return;
         if (f === 'text') s.text = e.target.value;
+        else if (f === 'style') { if (e.target.value) s.style = e.target.value; else delete s.style; fontTextAll().then(() => motDraw()); motT = clamp(s.t0 + .05, 0, MOT.dur); motPlay(true); }
         else { const v = parseFloat(e.target.value); if (isNaN(v)) return; s[f] = clamp(v, 0, 600); if (f === 't0') { motT = clamp(s.t0 + .01, 0, MOT.dur); } }
         motDraw(); saveSoon();
     });
@@ -2490,20 +2578,1546 @@
         if (a === 'here') { const len = s.t1 - s.t0; s.t0 = r1(motT); s.t1 = r1(Math.min(MOT.dur, s.t0 + Math.max(.3, len))); capSort(); }
         capListUI(); motDraw(); saveSoon();
     });
+    function capMigrate() {
+        const c = MOT.cap; if (c.treat) return;
+        c.treat = c.outline === false ? 'shadow' : 'outline';
+        c.enter = { fade: 'fade', type: 'type', none: 'none' }[c.fx] || 'fade';
+        c.exit = c.fx === 'fade' ? 'fade' : 'none';
+        c.layout = 'bottom'; c.accent = c.accent || '#ffd24a'; c.speed = 1; c.style = c.style || '';
+    }
     function capStyleUI() {
         const c = MOT.cap;
-        $('capFont').value = c.font; $('capFx').value = c.fx; $('capSize').value = c.size; $('capSizeV').textContent = c.size;
-        $('capY').value = c.y; $('capYV').textContent = c.y + '%'; $('capColor').value = c.color; $('capBold').checked = c.bold; $('capOutline').checked = c.outline;
+        $('capFont').value = c.font; $('capSize').value = c.size; $('capSizeV').textContent = c.size;
+        $('capY').value = c.y; $('capYV').textContent = c.y + '%'; $('capColor').value = c.color; $('capAccent').value = c.accent || '#ffd24a'; $('capBold').checked = c.bold !== false;
+        const fill = (id, list, v) => { const el = $(id); if (!el.options.length) el.innerHTML = list.map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join(''); el.value = v; };
+        if (typeof CAP_LAYOUTS !== 'undefined') { fill('capLayout', CAP_LAYOUTS, c.layout); fill('capTreat', CAP_TREATS, c.treat); fill('capEnter', CAP_ENTER, c.enter); fill('capExit', CAP_EXIT, c.exit); }
+        $('capSpeed').value = c.speed || 1; $('capSpeedV').textContent = '×' + (+(c.speed || 1)).toFixed(1);
+        $('capYRow').style.display = ['bottom', 'top'].includes(c.layout || 'bottom') ? '' : 'none';
+        $('capYL').textContent = c.layout === 'top' ? '위에서 위치' : '아래에서 위치';
+        if ($('capGal')) $('capGal').querySelectorAll('.cap-cell').forEach(b => b.classList.toggle('on', b.dataset.cs === c.style));
     }
     $('capFont').innerHTML = fontOpts('pretendard');
-    const capOn = (id, ev, k, conv) => $(id).addEventListener(ev, e => { MOT.cap[k] = conv(e.target); if (k === 'font') loadFont(MOT.cap.font).then(motDraw); capStyleUI(); motDraw(); saveSoon(); });
+    const capOn = (id, ev, k, conv, custom) => $(id).addEventListener(ev, e => { MOT.cap[k] = conv(e.target); if (custom) MOT.cap.style = ''; if (k === 'font') loadFont(MOT.cap.font).then(() => fontTextAll()).then(motDraw); capStyleUI(); motDraw(); saveSoon(); });
     capOn('capFont', 'change', 'font', t => t.value);
-    capOn('capFx', 'change', 'fx', t => t.value);
     capOn('capSize', 'input', 'size', t => +t.value);
     capOn('capY', 'input', 'y', t => +t.value);
     capOn('capColor', 'input', 'color', t => t.value);
+    capOn('capAccent', 'input', 'accent', t => t.value);
     capOn('capBold', 'change', 'bold', t => t.checked);
-    capOn('capOutline', 'change', 'outline', t => t.checked);
+    capOn('capLayout', 'change', 'layout', t => t.value, true);
+    capOn('capTreat', 'change', 'treat', t => t.value, true);
+    capOn('capEnter', 'change', 'enter', t => t.value, true);
+    capOn('capExit', 'change', 'exit', t => t.value, true);
+    capOn('capSpeed', 'input', 'speed', t => +t.value);
+
+    // ── 전환 모듈 ──
+    /* _tx2.js — 전문가급 씬 전환 팩 (canvas 2D). 순수 함수, 호스트가 EASE/blurDraw 주입.
+       API: TRANS2 (목록), transComp2(key,ctx,W,H,A,B,p,env) */
+
+    /* ---------- 내부 헬퍼 ---------- */
+    function tx2_rnd(i, k, seed) {
+      var n = Math.sin(i * 127.1 + k * 311.7 + (seed || 0) * 74.7) * 43758.5453123;
+      return n - Math.floor(n);
+    }
+    function tx2_clamp01(x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
+    function tx2_outCubic(x) { x = tx2_clamp01(x); return 1 - Math.pow(1 - x, 3); }
+    function tx2_inCubic(x) { x = tx2_clamp01(x); return x * x * x; }
+    function tx2_inOutCubic(x) { x = tx2_clamp01(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function tx2_bell(p) { p = tx2_clamp01(p); return Math.sin(Math.PI * p); }
+
+    var _tx2ScratchStore = {};
+    function tx2_scratch(name, w, h) {
+      w = Math.max(1, Math.round(w)); h = Math.max(1, Math.round(h));
+      var c = _tx2ScratchStore[name];
+      if (!c) { c = document.createElement('canvas'); _tx2ScratchStore[name] = c; }
+      if (c.width !== w) c.width = w;
+      if (c.height !== h) c.height = h;
+      return c;
+    }
+
+    /* ---------- 전환 목록 ---------- */
+    var TRANS2 = [
+      ['diag', '사선', '비스듬한 경계선 와이프', '기본'],
+      ['clock', '시계', '12시부터 회전 스윕', '기본'],
+      ['pushL', '밀기', '좌측으로 밀어내기', '기본'],
+      ['cover', '덮기', '새 장면이 위로 덮임', '기본'],
+      ['uncover', '걷기', '장면을 걷어내며 공개', '기본'],
+      ['circleSlide', '원확대', '원이 확장하며 등장', '기본'],
+      ['doors', '문열림', '양쪽으로 문이 열림', '역동'],
+      ['whip', '휩팬', '빠른 패닝 블러', '역동'],
+      ['zoomblur', '줌블러', '방사형 줌 블러', '역동'],
+      ['slices', '어긋남', '가로 띠가 교차 이동', '역동'],
+      ['flipH', '뒤집기', '수평 카드 뒤집기', '역동'],
+      ['checker', '체커보드', '격자 칸이 순서대로 열림', '그래픽'],
+      ['blocks', '블록', '무작위 타일 디졸브', '그래픽'],
+      ['ink', '잉크번짐', '잉크가 번지듯 확산', '그래픽'],
+      ['shatter', '파편', '유리처럼 깨져 낙하', '그래픽'],
+      ['heart', '하트', '하트 모양으로 확장', '그래픽'],
+      ['stripes', '줄무늬', '대각 줄무늬 와이프', '그래픽'],
+      ['burn', '필름번', '필름 라이트 릭', '빛·필름'],
+      ['tv', '브라운관', 'TV 꺼짐 켜짐 효과', '빛·필름'],
+      ['cube', '큐브', '입체 큐브 회전', '디지털'],
+      ['pixel', '모자이크', '픽셀화 후 복원', '디지털'],
+      ['rgbsplit', '색수차', 'RGB 채널 분리', '디지털']
+    ];
+
+    /* ---------- 디스패처 ---------- */
+    function transComp2(key, ctx, W, H, A, B, p, env) {
+      p = tx2_clamp01(p);
+      env = env || {};
+      if (!env.EASE) env.EASE = { io: tx2_inOutCubic, out: tx2_outCubic, in: tx2_inCubic, lin: function (x) { return x; } };
+      switch (key) {
+        case 'diag': return tx2_diag(ctx, W, H, A, B, p, env);
+        case 'clock': return tx2_clock(ctx, W, H, A, B, p, env);
+        case 'pushL': return tx2_pushL(ctx, W, H, A, B, p, env);
+        case 'cover': return tx2_cover(ctx, W, H, A, B, p, env);
+        case 'uncover': return tx2_uncover(ctx, W, H, A, B, p, env);
+        case 'circleSlide': return tx2_circleSlide(ctx, W, H, A, B, p, env);
+        case 'doors': return tx2_doors(ctx, W, H, A, B, p, env);
+        case 'whip': return tx2_whip(ctx, W, H, A, B, p, env);
+        case 'zoomblur': return tx2_zoomblur(ctx, W, H, A, B, p, env);
+        case 'slices': return tx2_slices(ctx, W, H, A, B, p, env);
+        case 'flipH': return tx2_flipH(ctx, W, H, A, B, p, env);
+        case 'checker': return tx2_checker(ctx, W, H, A, B, p, env);
+        case 'blocks': return tx2_blocks(ctx, W, H, A, B, p, env);
+        case 'ink': return tx2_ink(ctx, W, H, A, B, p, env);
+        case 'shatter': return tx2_shatter(ctx, W, H, A, B, p, env);
+        case 'heart': return tx2_heart(ctx, W, H, A, B, p, env);
+        case 'stripes': return tx2_stripes(ctx, W, H, A, B, p, env);
+        case 'burn': return tx2_burn(ctx, W, H, A, B, p, env);
+        case 'tv': return tx2_tv(ctx, W, H, A, B, p, env);
+        case 'cube': return tx2_cube(ctx, W, H, A, B, p, env);
+        case 'pixel': return tx2_pixel(ctx, W, H, A, B, p, env);
+        case 'rgbsplit': return tx2_rgbsplit(ctx, W, H, A, B, p, env);
+      }
+      return false;
+    }
+
+    /* ================= 1. diag — 사선 와이프 ================= */
+    function tx2_diag(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      var slope = H * 0.5;
+      var e = -slope + p * (W + slope * 2);
+      var topX = e, bottomX = e - slope;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(-W, 0); ctx.lineTo(topX, 0); ctx.lineTo(bottomX, H); ctx.lineTo(-W, H);
+      ctx.closePath(); ctx.clip();
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      var a = tx2_bell(p);
+      if (a > 0.02) {
+        ctx.save();
+        ctx.strokeStyle = env.accent || '#7bd7ff';
+        ctx.lineWidth = Math.max(1, W * 0.006);
+        ctx.globalAlpha = a * 0.9;
+        ctx.shadowColor = env.accent || '#7bd7ff';
+        ctx.shadowBlur = W * 0.02;
+        ctx.beginPath(); ctx.moveTo(topX, 0); ctx.lineTo(bottomX, H); ctx.stroke();
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 2. clock — 시계 와이프 ================= */
+    function tx2_clock(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      if (p <= 0) return true;
+      var cx = W / 2, cy = H / 2;
+      var r = Math.sqrt(cx * cx + cy * cy) + 2;
+      var start = -Math.PI / 2;
+      var end = start + p * Math.PI * 2;
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, end, false); ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      if (p > 0.01 && p < 0.99) {
+        var ex = cx + r * Math.cos(end), ey = cy + r * Math.sin(end);
+        ctx.save();
+        ctx.strokeStyle = env.accent || '#7bd7ff';
+        ctx.lineWidth = Math.max(1, W * 0.004);
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 3. pushL — 밀어내기(좌) ================= */
+    function tx2_pushL(ctx, W, H, A, B, p, env) {
+      var e = env.EASE.io(p);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var ax = -e * W, bx = (1 - e) * W;
+      var speed = tx2_bell(p);
+      if (speed > 0.15) {
+        for (var t = 3; t >= 1; t--) {
+          var off = t * speed * W * 0.01;
+          ctx.globalAlpha = 0.12;
+          ctx.drawImage(A, ax - off, 0, W, H);
+          ctx.drawImage(B, bx - off, 0, W, H);
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.drawImage(A, ax, 0, W, H);
+      ctx.drawImage(B, bx, 0, W, H);
+      return true;
+    }
+
+    /* ================= 4. cover — 덮기 ================= */
+    function tx2_cover(ctx, W, H, A, B, p, env) {
+      var e = env.EASE.out(p);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      var scale = 1 - 0.06 * e;
+      ctx.translate(W / 2, H / 2); ctx.scale(scale, scale); ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(A, 0, 0, W, H);
+      ctx.restore();
+      var dark = 0.5 * e;
+      if (dark > 0.001) { ctx.save(); ctx.globalAlpha = dark; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      var bx = (1 - e) * W;
+      ctx.drawImage(B, bx, 0, W, H);
+      return true;
+    }
+
+    /* ================= 5. uncover — 걷어내기 ================= */
+    function tx2_uncover(ctx, W, H, A, B, p, env) {
+      var e = env.EASE.io(p);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      var bscale = 1.06 - 0.06 * e;
+      ctx.translate(W / 2, H / 2); ctx.scale(bscale, bscale); ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      var ax = -e * W * 0.35, ay = e * H * 0.35;
+      var aAlpha = 1 - e;
+      if (aAlpha > 0.001) {
+        ctx.save(); ctx.globalAlpha = aAlpha; ctx.drawImage(A, ax, ay, W, H); ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 6. circleSlide — 원 확대 슬라이드 ================= */
+    function tx2_circleSlide(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      if (p <= 0) return true;
+      var e = tx2_inOutCubic(p);
+      var cx = 0, cy = H / 2;
+      var maxR = Math.sqrt(W * W + H * H) * 1.05;
+      var r = e * maxR;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      var a = tx2_bell(p);
+      if (a > 0.02) {
+        ctx.save();
+        ctx.strokeStyle = env.accent || '#7bd7ff';
+        ctx.lineWidth = Math.max(1, W * 0.006);
+        ctx.globalAlpha = a * 0.8;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 7. doors — 문 열림 ================= */
+    function tx2_doors(ctx, W, H, A, B, p, env) {
+      var e = env.EASE.io(p);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      var bscale = 1.08 - 0.08 * e;
+      ctx.translate(W / 2, H / 2); ctx.scale(bscale, bscale); ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      var half = W / 2;
+      var off = e * half * 1.15;
+      var shBell = e * (1 - e) * 4;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = W * 0.02 * shBell;
+      ctx.shadowOffsetX = 6 * shBell;
+      ctx.drawImage(A, 0, 0, half, H, -off, 0, half, H);
+      ctx.restore();
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = W * 0.02 * shBell;
+      ctx.shadowOffsetX = -6 * shBell;
+      ctx.drawImage(A, half, 0, half, H, half + off, 0, half, H);
+      ctx.restore();
+      return true;
+    }
+
+    /* ================= 8. whip — 휩팬 ================= */
+    function tx2_whip(ctx, W, H, A, B, p, env) {
+      var e = env.EASE.io(p);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var ax = -e * W, bx = (1 - e) * W;
+      var speed = tx2_bell(p);
+      if (speed > 0.05) {
+        for (var t = 8; t >= 1; t--) {
+          var frac = t / 8;
+          var off = frac * speed * W * 0.05;
+          ctx.globalAlpha = 0.06;
+          ctx.drawImage(A, ax - off, 0, W, H);
+          ctx.drawImage(B, bx + off, 0, W, H);
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.drawImage(A, ax, 0, W, H);
+      ctx.drawImage(B, bx, 0, W, H);
+      var bright = speed * 0.25;
+      if (bright > 0.01) { ctx.save(); ctx.globalAlpha = bright; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      return true;
+    }
+
+    /* ================= 9. zoomblur — 방사 줌블러 ================= */
+    function tx2_zoomblur(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var amt = tx2_bell(p);
+      var useB = p >= 0.5;
+      var base = useB ? B : A;
+      var scale = 1 + amt * 0.6;
+      ctx.save();
+      ctx.translate(W / 2, H / 2); ctx.scale(scale, scale); ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(base, 0, 0, W, H);
+      ctx.restore();
+      if (amt > 0.03) {
+        for (var k = 1; k <= 5; k++) {
+          var s = scale + k * 0.04 * amt;
+          ctx.save();
+          ctx.globalAlpha = 0.10 * amt;
+          ctx.translate(W / 2, H / 2); ctx.scale(s, s); ctx.translate(-W / 2, -H / 2);
+          ctx.drawImage(base, 0, 0, W, H);
+          ctx.restore();
+        }
+      }
+      return true;
+    }
+
+    /* ================= 10. slices — 띠 어긋남 ================= */
+    function tx2_slices(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      var rows = 9, rh = H / rows, stagger = 0.4;
+      for (var i = 0; i < rows; i++) {
+        var delay = i / (rows - 1) * stagger;
+        var local = tx2_clamp01((p - delay) / (1 - stagger));
+        if (local <= 0) continue;
+        var e = tx2_outCubic(local);
+        var dir = i % 2 === 0 ? 1 : -1;
+        var x = dir > 0 ? (1 - e) * W : -(1 - e) * W;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0, i * rh, W, rh); ctx.clip();
+        ctx.drawImage(B, x, 0, W, H);
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 11. flipH — 카드 뒤집기 ================= */
+    function tx2_flipH(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      env.blurDraw(ctx, B, W, H, Math.max(1, W * 0.02), 0.5);
+      var firstHalf = p < 0.5;
+      var t = firstHalf ? p / 0.5 : (p - 0.5) / 0.5;
+      var img = firstHalf ? A : B;
+      var scaleX = firstHalf ? (1 - env.EASE.in(t)) : env.EASE.out(t);
+      ctx.save();
+      ctx.translate(W / 2, H / 2);
+      ctx.scale(Math.max(0.001, scaleX), 1);
+      ctx.translate(-W / 2, -H / 2);
+      ctx.drawImage(img, 0, 0, W, H);
+      ctx.restore();
+      var dark = (1 - Math.min(1, Math.abs(scaleX))) * 0.4;
+      if (dark > 0.01) { ctx.save(); ctx.globalAlpha = dark; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      return true;
+    }
+
+    /* ================= 12. checker — 체커보드 ================= */
+    function tx2_checker(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      if (p <= 0) return true;
+      var cols = 8, rows = Math.max(3, Math.round(cols * H / W));
+      var cw = W / cols, ch = H / rows;
+      var maxDelayIdx = cols + rows - 2, staggerFrac = 0.55;
+      for (var j = 0; j < rows; j++) {
+        for (var i = 0; i < cols; i++) {
+          var d = (i + j) / maxDelayIdx * staggerFrac;
+          var local = tx2_clamp01((p - d) / (1 - staggerFrac));
+          if (local <= 0) continue;
+          var s = tx2_outCubic(local);
+          if (s <= 0) continue;
+          var cx = i * cw + cw / 2, cy = j * ch + ch / 2;
+          var w2 = cw * s, h2 = ch * s;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(cx - w2 / 2, cy - h2 / 2, w2, h2); ctx.clip();
+          ctx.drawImage(B, 0, 0, W, H);
+          ctx.restore();
+        }
+      }
+      return true;
+    }
+
+    /* ================= 13. blocks — 블록 디졸브 ================= */
+    function tx2_blocks(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var cols = 12, rows = 7;
+      // 정수 픽셀 경계로 스냅 (분수 소스 좌표는 캔버스 리샘플링을 느리게 만듦)
+      var xs = [], ys = [];
+      for (var a = 0; a <= cols; a++) xs.push(Math.round(a * W / cols));
+      for (var b = 0; b <= rows; b++) ys.push(Math.round(b * H / rows));
+      ctx.drawImage(A, 0, 0, W, H);
+      ctx.save(); ctx.beginPath(); var any = false;
+      for (var j = 0; j < rows; j++) {
+        for (var i = 0; i < cols; i++) {
+          if (p > tx2_rnd(i, j, env.seed) * 0.85) { ctx.rect(xs[i], ys[j], xs[i + 1] - xs[i], ys[j + 1] - ys[j]); any = true; }
+        }
+      }
+      if (any) { ctx.clip(); ctx.drawImage(B, 0, 0, W, H); }
+      ctx.restore();
+      var flash = Math.max(0, 1 - Math.abs(p - 0.5) * 6) * 0.35;
+      if (flash > 0.01) { ctx.save(); ctx.globalAlpha = flash; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      return true;
+    }
+
+    /* ================= 14. ink — 잉크 번짐 ================= */
+    function tx2_ink(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      if (p <= 0) return true;
+      var seed = env.seed || 0;
+      var cx = W * (0.35 + tx2_rnd(1, 2, seed) * 0.3), cy = H * (0.35 + tx2_rnd(3, 4, seed) * 0.3);
+      var maxR = Math.max(Math.hypot(cx, cy), Math.hypot(W - cx, cy), Math.hypot(cx, H - cy), Math.hypot(W - cx, H - cy)) * 1.18;
+      var e = tx2_inOutCubic(p);
+      var baseR = e * maxR;
+      var N = 48;
+      function radiusAt(theta, rBase) {
+        var r = rBase;
+        for (var h = 1; h <= 4; h++) {
+          var amp = rBase * 0.10 / h;
+          var phase = tx2_rnd(h, 7, seed) * Math.PI * 2;
+          r += Math.sin(theta * h * 2 + phase) * amp * Math.min(1, p * 2);
+        }
+        return Math.max(0, r);
+      }
+      ctx.save();
+      ctx.beginPath();
+      for (var i = 0; i <= N; i++) {
+        var th = i / N * Math.PI * 2;
+        var r = radiusAt(th, baseR);
+        var x = cx + Math.cos(th) * r, y = cy + Math.sin(th) * r;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath(); ctx.clip();
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      if (p < 0.97) {
+        ctx.save();
+        ctx.beginPath();
+        for (var i2 = 0; i2 <= N; i2++) {
+          var th2 = i2 / N * Math.PI * 2;
+          var r2 = radiusAt(th2, baseR) * 1.06 + W * 0.01;
+          var x2 = cx + Math.cos(th2) * r2, y2 = cy + Math.sin(th2) * r2;
+          if (i2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+        }
+        for (var i3 = 0; i3 <= N; i3++) {
+          var th3 = i3 / N * Math.PI * 2;
+          var r3 = radiusAt(th3, baseR);
+          var x3 = cx + Math.cos(th3) * r3, y3 = cy + Math.sin(th3) * r3;
+          ctx.lineTo(x3, y3);
+        }
+        ctx.closePath(); ctx.clip('evenodd');
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 15. shatter — 유리 파편 ================= */
+    function tx2_shatter(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      if (p <= 0) { ctx.drawImage(A, 0, 0, W, H); return true; }
+      ctx.drawImage(B, 0, 0, W, H);
+      if (p >= 1) return true;
+      var cols = 6, rows = 4, cw = W / cols, ch = H / rows;
+      var seed = env.seed || 0;
+      for (var j = 0; j < rows; j++) {
+        for (var i = 0; i < cols; i++) {
+          for (var t = 0; t < 2; t++) {
+            var rr = tx2_rnd(i * 2 + t, j, seed);
+            var delay = rr * 0.35;
+            var local = tx2_clamp01((p - delay) / (1 - 0.35));
+            var eased = tx2_inCubic(local);
+            if (eased >= 0.999) continue;
+            var x0 = i * cw, y0 = j * ch, cx = x0 + cw / 2, cy = y0 + ch / 2;
+            var fall = eased * eased * H * 0.9;
+            var rot = (rr - 0.5) * eased * 1.2;
+            var alpha = 1 - eased;
+            ctx.save();
+            ctx.beginPath();
+            if (t === 0) { ctx.moveTo(x0, y0); ctx.lineTo(x0 + cw, y0); ctx.lineTo(x0, y0 + ch); }
+            else { ctx.moveTo(x0 + cw, y0); ctx.lineTo(x0 + cw, y0 + ch); ctx.lineTo(x0, y0 + ch); }
+            ctx.closePath(); ctx.clip();
+            ctx.translate(cx, cy + fall);
+            ctx.rotate(rot);
+            ctx.translate(-cx, -cy);
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(A, 0, 0, W, H);
+            ctx.restore();
+          }
+        }
+      }
+      return true;
+    }
+
+    /* ================= 16. heart — 하트 아이리스 ================= */
+    function tx2_heart(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      if (p <= 0) return true;
+      var cx = W / 2, cy = H / 2;
+      var e = tx2_outCubic(p);
+      var diag = Math.sqrt(W * W + H * H);
+      var targetScale = diag * 1.6 / 16;
+      var scale = Math.pow(tx2_inOutCubic(p), 1.35) * targetScale + 0.0001;
+      var N = 60, pts = [];
+      for (var i = 0; i <= N; i++) {
+        var t = i / N * Math.PI * 2;
+        var x = 16 * Math.pow(Math.sin(t), 3);
+        var y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        pts.push([x, y]);
+      }
+      function tracePath() {
+        ctx.beginPath();
+        for (var k = 0; k <= N; k++) {
+          var px = cx + pts[k][0] * scale, py = cy + pts[k][1] * scale;
+          if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+      }
+      ctx.save();
+      tracePath(); ctx.clip();
+      ctx.drawImage(B, 0, 0, W, H);
+      ctx.restore();
+      var a = tx2_bell(p);
+      if (a > 0.02) {
+        ctx.save();
+        ctx.strokeStyle = env.accent || '#ff7bb0';
+        ctx.lineWidth = Math.max(1, W * 0.004);
+        ctx.globalAlpha = a * 0.9;
+        tracePath(); ctx.stroke();
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 17. stripes — 사선 줄무늬 ================= */
+    function tx2_stripes(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ctx.drawImage(A, 0, 0, W, H);
+      var n = 8, stripeW = W / n, slope = H * 0.35, stagger = 0.5;
+      var edges = []; // 리딩 엣지(accent 스트로크용)만 따로 기록
+      var any = false;
+      ctx.save();
+      ctx.beginPath(); // 모든 밴드를 하나의 경로에 모아 한 번만 clip → 이음선 이중 안티에일리어싱 방지
+      for (var i = 0; i < n; i++) {
+        var delay = i / (n - 1) * stagger;
+        var local = tx2_clamp01((p - delay) / (1 - stagger));
+        if (local <= 0) continue;
+        any = true;
+        var e = tx2_outCubic(local);
+        var bx = i * stripeW - (1 - e) * (W + slope);
+        var isFirst = i === 0, isLast = i === n - 1;
+        var leftPad = isFirst ? W * 2 : 0, rightPad = isLast ? W * 2 : 0;
+        ctx.moveTo(bx - leftPad, 0);
+        ctx.lineTo(bx + stripeW + rightPad, 0);
+        ctx.lineTo(bx + stripeW + rightPad - slope, H);
+        ctx.lineTo(bx - leftPad - slope, H);
+        ctx.closePath();
+        if (e < 0.985) edges.push([bx + stripeW, bx + stripeW - slope, 0.7 * (1 - e)]);
+      }
+      if (any) {
+        ctx.clip();
+        ctx.drawImage(B, 0, 0, W, H);
+      }
+      ctx.restore();
+      for (var k = 0; k < edges.length; k++) {
+        ctx.save();
+        ctx.strokeStyle = env.accent || '#7bd7ff';
+        ctx.lineWidth = Math.max(1, W * 0.004);
+        ctx.globalAlpha = edges[k][2];
+        ctx.beginPath(); ctx.moveTo(edges[k][0], 0); ctx.lineTo(edges[k][1], H); ctx.stroke();
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 18. burn — 필름 번 ================= */
+    function tx2_burn(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var useB = p > 0.5;
+      ctx.drawImage(useB ? B : A, 0, 0, W, H);
+      var glow = tx2_bell(p);
+      if (glow > 0.02) {
+        var seed = env.seed || 0;
+        // 저해상도로 그라디언트를 그려 확대(부드러운 빛이라 화질 손실 없음) — 풀해상도 fillRect보다 훨씬 빠름
+        var gw = Math.max(24, Math.round(W / 4)), gh = Math.max(24, Math.round(H / 4));
+        var s = tx2_scratch('burnGlow', gw, gh);
+        var sctx = s.getContext('2d');
+        sctx.clearRect(0, 0, gw, gh);
+        var cx = gw * (0.3 + tx2_rnd(9, 1, seed) * 0.4), cy = gh * (0.3 + tx2_rnd(2, 9, seed) * 0.4);
+        var r = Math.max(gw, gh) * (0.15 + glow * 0.9);
+        var g = sctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, 'rgba(255,255,240,' + (0.95 * glow) + ')');
+        g.addColorStop(0.35, 'rgba(255,180,90,' + (0.75 * glow) + ')');
+        g.addColorStop(0.7, 'rgba(255,110,40,' + (0.35 * glow) + ')');
+        g.addColorStop(1, 'rgba(255,80,20,0)');
+        sctx.fillStyle = g;
+        sctx.fillRect(0, 0, gw, gh);
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.drawImage(s, 0, 0, gw, gh, 0, 0, W, H);
+        ctx.restore();
+      }
+      return true;
+    }
+
+    /* ================= 19. tv — 브라운관 ================= */
+    function tx2_tv(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var firstHalf = p < 0.5;
+      if (firstHalf) {
+        var t = p / 0.5, e = env.EASE.in(t);
+        ctx.save();
+        ctx.translate(W / 2, H / 2); ctx.scale(1, Math.max(0.0015, 1 - e)); ctx.translate(-W / 2, -H / 2);
+        ctx.drawImage(A, 0, 0, W, H);
+        ctx.restore();
+        var flash = e > 0.7 ? (e - 0.7) / 0.3 : 0;
+        if (flash > 0.01) { ctx.save(); ctx.globalAlpha = flash * 0.6; ctx.fillStyle = '#fff'; ctx.fillRect(0, H / 2 - 2, W, 4); ctx.restore(); }
+      } else {
+        var t2 = (p - 0.5) / 0.5, e2 = env.EASE.out(t2);
+        ctx.save();
+        ctx.translate(W / 2, H / 2); ctx.scale(1, Math.max(0.0015, e2)); ctx.translate(-W / 2, -H / 2);
+        ctx.drawImage(B, 0, 0, W, H);
+        ctx.restore();
+        var flash2 = e2 < 0.3 ? (0.3 - e2) / 0.3 : 0;
+        if (flash2 > 0.01) { ctx.save(); ctx.globalAlpha = flash2 * 0.6; ctx.fillStyle = '#fff'; ctx.fillRect(0, H / 2 - 2, W, 4); ctx.restore(); }
+      }
+      return true;
+    }
+
+    /* ================= 20. cube — 큐브 회전 ================= */
+    function tx2_cube(ctx, W, H, A, B, p, env) {
+      // 입체 큐브 회전(왼쪽으로): 두 면이 공유 모서리를 두고 원근으로 접힘
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      if (p <= 0 || p >= 1) { ctx.drawImage(p <= 0 ? A : B, 0, 0, W, H); return true; }
+      var e = tx2_inOutCubic(p), s = W * (1 - e), n = 20;
+      var mid = 1 - 0.1 * tx2_bell(p);           // 공유 모서리는 살짝 멀어짐
+      function face(img, x0, x1, hL, hR, dark) {
+        var fw = x1 - x0; if (fw < 1) return;
+        var sw = W / n;
+        for (var i = 0; i < n; i++) {
+          var t0 = i / n, t1 = (i + 1) / n, tm = (t0 + t1) / 2;
+          var hs = hL + (hR - hL) * tm, dh = H * hs;
+          var dx = x0 + fw * t0, dw = fw * (t1 - t0) + 0.8;
+          ctx.drawImage(img, i * sw, 0, sw, H, dx, (H - dh) / 2, dw, dh);
+        }
+        if (dark > 0.01) { ctx.save(); ctx.globalAlpha = dark; ctx.fillStyle = '#000'; ctx.fillRect(x0, 0, fw, H); ctx.restore(); }
+      }
+      face(A, 0, s, 1 - 0.22 * e, mid, e * 0.55);
+      face(B, s, W, mid, 1 - 0.22 * (1 - e), (1 - e) * 0.55);
+      var a = tx2_bell(p);
+      if (a > 0.05) { ctx.save(); ctx.globalAlpha = a * 0.5; ctx.fillStyle = env.accent || '#fff'; ctx.fillRect(s - 1, H * (1 - mid) / 2, 2, H * mid); ctx.restore(); }
+      return true;
+    }
+
+    /* ================= 21. pixel — 모자이크 ================= */
+    function tx2_pixel(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var firstHalf = p < 0.5;
+      var img = firstHalf ? A : B;
+      var t = firstHalf ? (p / 0.5) : (1 - (p - 0.5) / 0.5);
+      var maxCell = Math.max(2, Math.round(Math.min(W, H) / 14));
+      var cellSize = Math.max(1, Math.round(1 + (maxCell - 1) * t));
+      if (cellSize <= 1) { ctx.drawImage(img, 0, 0, W, H); return true; }
+      var sw = Math.max(1, Math.round(W / cellSize)), sh = Math.max(1, Math.round(H / cellSize));
+      var s = tx2_scratch('pixel', sw, sh);
+      var sctx = s.getContext('2d');
+      sctx.imageSmoothingEnabled = true;
+      sctx.clearRect(0, 0, sw, sh);
+      sctx.drawImage(img, 0, 0, W, H, 0, 0, sw, sh);
+      var prevSmooth = ctx.imageSmoothingEnabled;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(s, 0, 0, sw, sh, 0, 0, W, H);
+      ctx.imageSmoothingEnabled = prevSmooth === undefined ? true : prevSmooth;
+      return true;
+    }
+
+    /* ================= 22. rgbsplit — 색수차 전환 ================= */
+    function tx2_rgbsplit(ctx, W, H, A, B, p, env) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      var amt = tx2_bell(p);
+      var useB = p >= 0.5;
+      var base = useB ? B : A;
+      if (amt < 0.04) { ctx.drawImage(base, 0, 0, W, H); return true; }
+      var seed = env.seed || 0;
+      var jit = (tx2_rnd(5, Math.floor(p * 41), seed) - 0.5) * 2 * amt * W * 0.01;
+      var shift = amt * W * 0.028;
+      var chans = [
+        { dx: shift + jit, color: '#ff2b3d' },
+        { dx: 0, color: '#25ff8a' },
+        { dx: -shift + jit, color: '#2b7bff' }
+      ];
+      // 절반 해상도로 채널 분리 후 확대 합성 (색수차는 뭉개져도 자연스러움, 속도 크게 개선)
+      var rw = Math.max(16, Math.round(W / 2)), rh = Math.max(16, Math.round(H / 2));
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var ci = 0; ci < chans.length; ci++) {
+        var c = chans[ci];
+        var s = tx2_scratch('rgb_' + ci, rw, rh);
+        var sctx = s.getContext('2d');
+        sctx.globalCompositeOperation = 'source-over';
+        sctx.clearRect(0, 0, rw, rh);
+        sctx.drawImage(base, 0, 0, W, H, 0, 0, rw, rh);
+        sctx.globalCompositeOperation = 'multiply';
+        sctx.fillStyle = c.color;
+        sctx.fillRect(0, 0, rw, rh);
+        ctx.drawImage(s, 0, 0, rw, rh, c.dx, 0, W, H);
+      }
+      ctx.restore();
+      return true;
+    }
+
+    /* UMD 노출 (모듈이 아닌 일반 스크립트로도 동작) */
+    if (typeof window !== 'undefined') {
+      window.TRANS2 = TRANS2;
+      window.transComp2 = transComp2;
+    }
+    if (typeof module !== 'undefined' && module.exports) {
+      module.exports = { TRANS2: TRANS2, transComp2: transComp2 };
+    }
+
+    // ── 자막 모듈 ──
+    /* _cap2.js — 애니메이션 자막/캡션 엔진 (캔버스 2D, 순수 함수 시간 기반)
+     * 전역 스코프에 상수/함수를 선언하는 일반 <script> 모듈. import/export 없음.
+     * 공개 API: CAP_LAYOUTS, CAP_TREATS, CAP_ENTER, CAP_EXIT, CAP_STYLES,
+     *           capLook(base, styleKey), drawCaps2(ctx,W,H,t,items,env), capThumb(canvas,styleKey,t,env)
+     */
+
+    /* ---------------------------------------------------------------------- *
+     *  글자 목록 (한글 라벨)
+     * ---------------------------------------------------------------------- */
+    const CAP_LAYOUTS = [
+      ['bottom', '아래'], ['center', '중앙'], ['top', '위'], ['huge', '대형'],
+      ['lower', '하단 자막띠'], ['left', '좌측'], ['vertical', '세로쓰기']
+    ];
+    const CAP_TREATS = [
+      ['plain', '기본'], ['outline', '외곽선'], ['shadow', '그림자'], ['hard', '하드섀도'],
+      ['neon', '네온'], ['box', '박스'], ['band', '밴드'], ['marker', '형광펜'],
+      ['gradient', '그라디언트'], ['chrome', '크롬'], ['extrude', '돌출'], ['hollow', '속빈글자'],
+      ['karaoke', '가라오케'], ['underline', '밑줄'], ['glow', '글로우']
+    ];
+    const CAP_ENTER = [
+      ['fade', '페이드'], ['rise', '솟아오름'], ['drop', '낙하 바운스'], ['pop', '팝'],
+      ['blurIn', '블러인'], ['type', '타이핑'], ['slideL', '좌측 슬라이드'], ['spread', '자간 모임'],
+      ['flip', '플립'], ['glitch', '글리치'], ['wave', '물결'], ['zoom', '줌인'],
+      ['neon', '네온 점등'], ['stamp', '스탬프'], ['roll', '롤인'], ['scramble', '스크램블'], ['none', '없음']
+    ];
+    const CAP_EXIT = [
+      ['fade', '페이드아웃'], ['sink', '가라앉음'], ['riseOut', '솟아오르며 사라짐'], ['blurOut', '블러아웃'],
+      ['popOut', '팝아웃'], ['slideR', '우측 슬라이드'], ['spreadOut', '자간 벌어짐'], ['glitchOut', '글리치아웃'],
+      ['dissolve', '무작위 소멸'], ['wipe', '와이프'], ['dropOut', '낙하 소멸'], ['none', '없음']
+    ];
+
+    const CAP_DEFAULT = {
+      font: 'pretendard', size: 34, color: '#ffffff', accent: '#ffd24a', bold: true,
+      layout: 'bottom', y: 8, treat: 'shadow', enter: 'fade', exit: 'fade', speed: 1, tracking: 0
+    };
+
+    /* ≥16 커스텀 프리셋 ------------------------------------------------------ */
+    const CAP_STYLES = {
+      basic: { name: '기본 자막', desc: '깔끔한 외곽선, 아래 페이드', font: 'pretendard', size: 32, color: '#ffffff', treat: 'outline', layout: 'bottom', y: 9, enter: 'fade', exit: 'fade' },
+      netflix: { name: '넷플릭스', desc: '화이트 + 소프트 섀도', font: 'pretendard', size: 30, color: '#f5f5f5', treat: 'shadow', layout: 'bottom', y: 8, enter: 'fade', exit: 'fade', bold: false },
+      yt_box: { name: '유튜브 박스', desc: '말풍선 박스 + 팝', font: 'pretendard', size: 30, color: '#ffffff', treat: 'box', layout: 'bottom', y: 9, enter: 'pop', exit: 'popOut' },
+      variety: { name: '예능 자막', desc: '노란 글자 + 쾅 스탬프', font: 'blackhan', size: 38, color: '#ffe14d', accent: '#7a1010', treat: 'hard', layout: 'bottom', y: 11, enter: 'stamp', exit: 'popOut' },
+      cinema_band: { name: '시네마 밴드', desc: '전체 폭 밴드 + 세리프', font: 'nanummj', size: 30, color: '#f0ead6', treat: 'band', layout: 'bottom', y: 10, enter: 'spread', exit: 'spreadOut', bold: false },
+      neon_sign: { name: '네온 사인', desc: '핑크/시안 네온 점등', font: 'gong', size: 36, color: '#ff5fd0', accent: '#38f5ff', treat: 'neon', layout: 'center', enter: 'neon', exit: 'blurOut' },
+      typewriter: { name: '타자기', desc: '한 글자씩 타이핑', font: 'dohyeon', size: 30, color: '#eaffea', treat: 'outline', layout: 'bottom', y: 9, enter: 'type', exit: 'fade' },
+      mj_soft: { name: '감성 명조', desc: '블러인 + 은은한 글로우', font: 'nanummj', size: 32, color: '#fff4e0', treat: 'glow', layout: 'center', enter: 'blurIn', exit: 'blurOut', bold: false },
+      handwriting: { name: '손글씨 일기', desc: '물결치며 등장', font: 'nanumpen', size: 34, color: '#ffffff', treat: 'plain', layout: 'bottom', y: 10, enter: 'wave', exit: 'fade', bold: false },
+      news_lower: { name: '뉴스 하단', desc: '네임플레이트 + 슬라이드', font: 'pretendard', size: 26, color: '#ffffff', accent: '#1877ff', treat: 'box', layout: 'lower', enter: 'slideL', exit: 'slideR' },
+      mv_title: { name: '뮤비 타이틀', desc: '대형 크롬 + 줌인', font: 'gmarket', size: 60, color: '#ffffff', accent: '#c9ced6', treat: 'chrome', layout: 'huge', enter: 'zoom', exit: 'blurOut', tracking: 0.04 },
+      glitch_fx: { name: '글리치', desc: 'RGB 어긋남 노이즈', font: 'pretendard', size: 34, color: '#ffffff', treat: 'hollow', layout: 'center', enter: 'glitch', exit: 'glitchOut' },
+      marker_style: { name: '형광펜', desc: '형광펜 강조', font: 'pretendard', size: 30, color: '#101014', accent: '#ffe36b', treat: 'marker', layout: 'bottom', y: 9, enter: 'rise', exit: 'fade' },
+      karaoke_style: { name: '가라오케', desc: '색이 채워지며 읽기', font: 'pretendard', size: 32, color: '#9aa0ac', accent: '#ffd24a', treat: 'karaoke', layout: 'bottom', y: 9, enter: 'fade', exit: 'fade' },
+      vertical_write: { name: '세로 쓰기', desc: '전통 세로쓰기', font: 'songmyung', size: 30, color: '#ffffff', treat: 'shadow', layout: 'vertical', enter: 'fade', exit: 'fade', bold: false },
+      stamp_style: { name: '스탬프', desc: '쾅 찍히는 도장체', font: 'blackhan', size: 40, color: '#ffffff', accent: '#d61f3c', treat: 'hard', layout: 'center', enter: 'stamp', exit: 'popOut' },
+      idol_cam: { name: '아이돌 직캠 이름', desc: '하단 네임플레이트 + 돌출', font: 'gmarket', size: 26, color: '#ffffff', accent: '#7d5cff', treat: 'extrude', layout: 'lower', enter: 'pop', exit: 'fade' },
+      romantic: { name: '로맨틱', desc: '핑크 글로우 + 물결', font: 'nanumpen', size: 32, color: '#ffd9ea', accent: '#ff8fc0', treat: 'glow', layout: 'bottom', y: 10, enter: 'wave', exit: 'blurOut', bold: false }
+    };
+
+    /* ---------------------------------------------------------------------- *
+     *  내부 헬퍼: 색상 / 랜덤 / 이징
+     * ---------------------------------------------------------------------- */
+    function parseColor(c) {
+      if (!c) return [255, 255, 255, 1];
+      if (c[0] === '#') {
+        let h = c.slice(1);
+        if (h.length === 3) h = h.split('').map(x => x + x).join('');
+        const n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 1];
+      }
+      const m = c.match(/rgba?\(([^)]+)\)/);
+      if (m) { const p = m[1].split(',').map(s => parseFloat(s)); return [p[0] || 0, p[1] || 0, p[2] || 0, p[3] != null ? p[3] : 1]; }
+      return [255, 255, 255, 1];
+    }
+    function shade(c, amt) {
+      const [r, g, b, a] = parseColor(c);
+      const f = v => Math.max(0, Math.min(255, v + (amt < 0 ? v * amt : (255 - v) * amt)));
+      return `rgba(${f(r) | 0},${f(g) | 0},${f(b) | 0},${a})`;
+    }
+    function shadeAlpha(c, alpha) { const [r, g, b] = parseColor(c); return `rgba(${r},${g},${b},${alpha})`; }
+
+    function hash01(i, seed) { const x = Math.sin((i + 1) * 12.9898 + (seed || 0) * 78.233) * 43758.5453; return x - Math.floor(x); }
+    function outBack(p) { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); }
+    function bounceOut(p) {
+      const n1 = 7.5625, d1 = 2.75;
+      if (p < 1 / d1) return n1 * p * p;
+      if (p < 2 / d1) { p -= 1.5 / d1; return n1 * p * p + 0.75; }
+      if (p < 2.5 / d1) { p -= 2.25 / d1; return n1 * p * p + 0.9375; }
+      p -= 2.625 / d1; return n1 * p * p + 0.984375;
+    }
+    const SCRAMBLE_POOL = '가나다라마바사아자차카타파하ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+
+    /* 스태거 순서: 글자 index -> 0..1 위치값 */
+    const ENTER_ORDER = { fade: 'lr', rise: 'lr', drop: 'lr', pop: 'center', blurIn: 'lr', type: 'global', slideL: 'lr', spread: 'center', flip: 'lr', glitch: 'rand', wave: 'lr', zoom: 'center', neon: 'lr', stamp: 'center', roll: 'lr', scramble: 'global', none: 'lr' };
+    const EXIT_ORDER = { fade: 'lr', sink: 'lr', riseOut: 'rl', blurOut: 'lr', popOut: 'center', slideR: 'lr', spreadOut: 'center', glitchOut: 'rand', dissolve: 'rand', wipe: 'lr', dropOut: 'rl', none: 'lr' };
+    function orderIndex(key, i, N, globalIdx, total) {
+      switch (key) {
+        case 'global': return total > 1 ? globalIdx / (total - 1) : 0;
+        case 'rl': return N > 1 ? 1 - i / (N - 1) : 0;
+        case 'center': { const c = (N - 1) / 2 || 1; return N > 1 ? Math.abs(i - (N - 1) / 2) / c : 0; }
+        case 'rand': return hash01(i, 7);
+        default: return N > 1 ? i / (N - 1) : 0; // 'lr'
+      }
+    }
+    /* localT 기준, 글자별 겹쳐 흐르는 진행도(0..1). oi=순서위치, totalDur=전체구간, glyphDur=글자 하나의 활성구간 */
+    function glyphProgress(localT, oi, totalDur, glyphDur) {
+      const Ld = Math.max(0.001, Math.min(glyphDur, totalDur));
+      const spread = Math.max(0, totalDur - Ld);
+      const start = oi * spread;
+      return Math.max(0, Math.min(1, (localT - start) / Ld));
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *  등장(enter) / 퇴장(exit) 효과 — 글자당 부분 상태 반환
+     *  info = {size, time, cx(-1..1 줄 내 위치), env}
+     * ---------------------------------------------------------------------- */
+    const ENTER_FX = {
+      fade(p, i, N, info) { return { a: info.env.EASE.out(p) }; },
+      rise(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, clip: 1 - e, clipDir: 'bottom' }; },
+      drop(p, i, N, info) { const b = bounceOut(p); return { a: p > 0.02 ? 1 : 0, dy: (1 - b) * -1.3 * info.size }; },
+      pop(p, i, N, info) { const s = outBack(Math.min(1, p)); return { a: p > 0.01 ? 1 : 0, sx: s, sy: s }; },
+      blurIn(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, blur: (1 - e) * info.size * 0.35 }; },
+      type(p, i, N, info) { return { a: p > 0.001 ? 1 : 0 }; },
+      slideL(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, dx: (1 - e) * -info.size * 1.6 }; },
+      spread(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, dx: (1 - e) * info.cx * info.size * 2.2 }; },
+      flip(p, i, N, info) { return { a: 1, sy: Math.cos((1 - p) * Math.PI) }; },
+      glitch(p, i, N, info) {
+        const h = hash01(i, 3);
+        const flick = p < 0.22 ? (((p * 40 + h * 9) % 1) < 0.55 ? 1 : 0.18) : 1;
+        return { a: p > 0.01 ? flick : 0, dx: (1 - p) * h * info.size * 0.5, glitchAmt: Math.max(0, 1 - p * 1.6) };
+      },
+      wave(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, dy: Math.sin(p * Math.PI * 2 - info.cx * 2) * (1 - e) * info.size * 0.5 }; },
+      zoom(p, i, N, info) { const e = info.env.EASE.out(p); const s = 1 + (1 - e) * 1.5; return { a: e, sx: s, sy: s }; },
+      neon(p, i, N, info) { const h = hash01(i, 5); const on = p < 0.55 ? ((Math.floor(p * 24 + h * 6) % 2) === 0 ? 1 : 0.12) : 1; return { a: on }; },
+      stamp(p, i, N, info) {
+        if (p < 0.72) { const e = info.env.EASE.in(p / 0.72); const s = 3 - 2 * e; return { a: 1, sx: s, sy: s }; }
+        const q = (p - 0.72) / 0.28; return { a: 1, dx: Math.sin(q * 40) * info.size * 0.05 * (1 - q) };
+      },
+      roll(p, i, N, info) { const e = info.env.EASE.out(p); return { a: e, dx: (1 - e) * -info.size * 2.2, rot: (1 - e) * -Math.PI * 1.3 }; },
+      scramble(p, i, N, info) {
+        if (p >= 0.999) return { a: 1, ch: null };
+        const idx = Math.floor(hash01(i, Math.floor(p * 14)) * SCRAMBLE_POOL.length);
+        return { a: 1, ch: SCRAMBLE_POOL[idx] };
+      },
+      none(p, i, N, info) { return { a: 1 }; }
+    };
+
+    const EXIT_FX = {
+      fade(p, i, N, info) { return { a: 1 - info.env.EASE.out(p) }; },
+      sink(p, i, N, info) { const e = info.env.EASE.out(p); return { a: 1 - e, dy: e * info.size * 0.7 }; },
+      riseOut(p, i, N, info) { const e = info.env.EASE.out(p); return { a: 1 - e, dy: -e * info.size * 1.3 }; },
+      blurOut(p, i, N, info) { const e = info.env.EASE.out(p); return { a: 1 - e * 0.92, blur: e * info.size * 0.4 }; },
+      popOut(p, i, N, info) { const e = info.env.EASE.in(p); return { a: 1 - e, sx: 1 - e * 0.9, sy: 1 - e * 0.9 }; },
+      slideR(p, i, N, info) { const e = info.env.EASE.out(p); return { a: 1 - e, dx: e * info.size * 1.6 }; },
+      spreadOut(p, i, N, info) { const e = info.env.EASE.out(p); return { a: 1 - e, dx: e * info.cx * info.size * 2.2 }; },
+      glitchOut(p, i, N, info) {
+        const h = hash01(i, 9); const e = info.env.EASE.in(p);
+        const flick = e < 0.75 ? (((e * 30 + h * 7) % 1) < 0.5 ? 1 : 0.15) : 0;
+        return { a: flick, dx: e * h * info.size * 0.6, glitchAmt: e };
+      },
+      dissolve(p, i, N, info) { return { a: 1 - info.env.EASE.out(p) }; },
+      wipe(p, i, N, info) { return { a: 1, clip: info.env.EASE.io(p), clipDir: 'left' }; },
+      dropOut(p, i, N, info) { const e = info.env.EASE.in(p); const a = e < 0.75 ? 1 : Math.max(0, 1 - (e - 0.75) / 0.25); return { a, dy: e * e * info.size * 1.4, rot: e * 0.7 }; },
+      none(p, i, N, info) { return { a: 1 }; }
+    };
+
+    /* ---------------------------------------------------------------------- *
+     *  레이아웃/측정 캐시
+     * ---------------------------------------------------------------------- */
+    let ENV_REF = null; // drawCaps2 실행 중에만 유효(단일 스레드 가정)
+    function fontString(L, size) { return `${L.bold ? '700' : '400'} ${size}px ${ENV_REF.fontFace(L.font)}`; }
+
+    const LAYOUT_CACHE = new Map();
+    function getLayout(ctx, L, s, size) {
+      const key = L.font + '|' + (L.bold ? 1 : 0) + '|' + size.toFixed(2) + '|' + (L.tracking || 0) + '|' + s.text;
+      let hit = LAYOUT_CACHE.get(key);
+      if (hit) return hit;
+      ctx.font = fontString(L, size);
+      const trackPx = (L.tracking || 0) * size;
+      const lines = s.text.split('\n').map(line => [...line]);
+      const lineInfos = lines.map(glist => {
+        let x = 0;
+        const chars = glist.map(ch => { const w = ctx.measureText(ch).width; const info = { ch, w, x }; x += w + trackPx; return info; });
+        return { chars, width: Math.max(0, x - trackPx) };
+      });
+      const maxWidth = Math.max(1, ...lineInfos.map(l => l.width));
+      const lineH = size * (L.layout === 'huge' ? 1.18 : 1.34);
+      const blockH = lineH * lineInfos.length;
+      const totalGlyphs = lineInfos.reduce((a, l) => a + l.chars.length, 0);
+      const out = { lines: lineInfos, maxWidth, lineH, blockH, totalGlyphs };
+      LAYOUT_CACHE.set(key, out);
+      if (LAYOUT_CACHE.size > 600) LAYOUT_CACHE.clear();
+      return out;
+    }
+
+    function anchorFor(L, lay, W, H, size, stackIndex) {
+      const stackGap = lay.lineH * 0.15;
+      const stackShift = stackIndex * (lay.blockH + stackGap);
+      switch (L.layout) {
+        case 'bottom': { const baseY = H - H * (L.y / 100); return { cx: W / 2, topY: baseY - lay.blockH - stackShift, align: 'center' }; }
+        case 'top': { const baseY = H * (L.y / 100); return { cx: W / 2, topY: baseY + stackShift, align: 'center' }; }
+        case 'center': { const topY = H / 2 - lay.blockH / 2; return { cx: W / 2, topY: topY - stackShift, align: 'center' }; }
+        case 'huge': { const topY = H / 2 - lay.blockH / 2; return { cx: W / 2, topY: topY - stackShift, align: 'center' }; }
+        case 'lower': { const leftX = W * 0.07; const baseY = H * 0.8; return { cx: leftX, topY: baseY - lay.blockH - stackShift, align: 'left' }; }
+        case 'left': { const leftX = W * 0.08; const topY = H / 2 - lay.blockH / 2 - stackShift; return { cx: leftX, topY, align: 'left' }; }
+        case 'vertical': { return { cx: W * 0.86, topY: H * 0.1, align: 'vertical' }; }
+        default: return { cx: W / 2, topY: H * 0.5, align: 'center' };
+      }
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *  배경 데코(box/band/marker/underline) + 하단 네임플레이트 바
+     * ---------------------------------------------------------------------- */
+    function roundRect(ctx, x, y, w, h, r) {
+      r = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+    function drawBackdrop(ctx, L, lay, anchor, size, envAlpha, W) {
+      if (envAlpha <= 0.003) return;
+      if (L.treat === 'band') {
+        const pad = size * 0.4, y = anchor.topY - pad, h = lay.blockH + pad * 2;
+        ctx.save(); ctx.fillStyle = shadeAlpha('#000000', 0.5 * envAlpha); ctx.fillRect(0, y, W, h); ctx.restore();
+        return;
+      }
+      if (L.treat === 'box' || L.treat === 'marker') {
+        ctx.save();
+        lay.lines.forEach((line, li) => {
+          const y = anchor.topY + li * lay.lineH;
+          const w = line.width;
+          const x = anchor.align === 'center' ? anchor.cx - w / 2 : anchor.cx;
+          if (L.treat === 'box') {
+            const pad = size * 0.3;
+            roundRect(ctx, x - pad, y - pad * 0.5, w + pad * 2, lay.lineH * 0.92, size * 0.22);
+            ctx.fillStyle = shadeAlpha('#000000', 0.52 * envAlpha); ctx.fill();
+          } else {
+            ctx.save(); ctx.translate(x + w / 2, y + lay.lineH * 0.42); ctx.rotate(-0.02);
+            ctx.fillStyle = shadeAlpha(L.accent, 0.55 * envAlpha);
+            ctx.fillRect(-w / 2, -size * 0.42, w, size * 0.84);
+            ctx.restore();
+          }
+        });
+        ctx.restore();
+      }
+    }
+    function drawLineDecor(ctx, L, lay, anchor, size, envAlpha, localT, dE) {
+      if (envAlpha <= 0.003) return;
+      if (L.treat === 'underline') {
+        const growP = Math.max(0, Math.min(1, localT / Math.max(0.001, dE)));
+        ctx.save(); ctx.globalAlpha = envAlpha; ctx.fillStyle = L.accent;
+        lay.lines.forEach((line, li) => {
+          const y = anchor.topY + li * lay.lineH + lay.lineH * 0.9;
+          const x0 = anchor.align === 'center' ? anchor.cx - line.width / 2 : anchor.cx;
+          ctx.fillRect(x0, y, line.width * growP, Math.max(2, size * 0.06));
+        });
+        ctx.restore();
+      }
+      if (L.layout === 'lower') {
+        ctx.save(); ctx.globalAlpha = envAlpha; ctx.fillStyle = L.accent;
+        ctx.fillRect(anchor.cx - size * 0.55, anchor.topY - size * 0.12, size * 0.12, lay.blockH + size * 0.12);
+        ctx.restore();
+      }
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *  글자별 채우기(트리트먼트) + 그리기(클립/블러/글리치 잔상)
+     * ---------------------------------------------------------------------- */
+    function fillGlyph(ctx, ch, size, L, info) {
+      if (!ch) return;
+      ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      ctx.font = fontString(L, size);
+      switch (L.treat) {
+        case 'outline':
+          ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.lineWidth = size * 0.16;
+          ctx.strokeStyle = 'rgba(0,0,0,0.82)'; ctx.strokeText(ch, 0, 0);
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0); break;
+        case 'shadow':
+          ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = size * 0.22; ctx.shadowOffsetY = size * 0.05;
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0);
+          ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; break;
+        case 'hard':
+          ctx.fillStyle = L.accent; ctx.fillText(ch, size * 0.07, size * 0.07);
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0); break;
+        case 'neon': {
+          const pulse = 0.65 + 0.35 * Math.sin(info.time * 3.1);
+          ctx.shadowColor = L.accent; ctx.shadowBlur = size * 0.85 * pulse;
+          ctx.fillStyle = L.accent; ctx.fillText(ch, 0, 0);
+          ctx.shadowBlur = size * 0.4 * pulse; ctx.fillStyle = '#fff'; ctx.fillText(ch, 0, 0);
+          ctx.shadowBlur = 0; break;
+        }
+        case 'gradient': {
+          const g = ctx.createLinearGradient(0, -size * 0.9, 0, size * 0.25);
+          g.addColorStop(0, L.color); g.addColorStop(1, L.accent);
+          ctx.fillStyle = g; ctx.fillText(ch, 0, 0); break;
+        }
+        case 'chrome': {
+          const g = ctx.createLinearGradient(0, -size * 0.9, 0, size * 0.3);
+          g.addColorStop(0, '#ffffff'); g.addColorStop(0.35, '#9aa3ad'); g.addColorStop(0.5, L.accent || '#cfd6dd');
+          g.addColorStop(0.65, '#7d8590'); g.addColorStop(1, '#f4f6f8');
+          ctx.lineWidth = size * 0.05; ctx.strokeStyle = 'rgba(20,20,25,0.8)'; ctx.strokeText(ch, 0, 0);
+          ctx.fillStyle = g; ctx.fillText(ch, 0, 0); break;
+        }
+        case 'extrude': {
+          const dark = shade(L.accent, -0.45);
+          for (let k = 6; k >= 1; k--) { ctx.fillStyle = dark; ctx.fillText(ch, k * size * 0.028, k * size * 0.028); }
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0); break;
+        }
+        case 'hollow':
+          ctx.lineWidth = size * 0.07; ctx.strokeStyle = L.color; ctx.strokeText(ch, 0, 0); break;
+        case 'karaoke':
+          ctx.fillStyle = info.karaokeFrac <= info.karaokeP ? L.accent : L.color; ctx.fillText(ch, 0, 0); break;
+        case 'glow':
+          ctx.shadowColor = L.color; ctx.shadowBlur = size * 0.4;
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0);
+          ctx.shadowBlur = 0; ctx.fillText(ch, 0, 0); break;
+        default: // plain, box, band, marker, underline
+          ctx.fillStyle = L.color; ctx.fillText(ch, 0, 0);
+      }
+    }
+
+    function paintGlyph(ctx, ch, x, y, size, L, g, info, gw) {
+      if (g.a == null ? false : g.a <= 0.003) return;
+      ctx.save();
+      ctx.translate(x + (g.dx || 0), y + (g.dy || 0));
+      // 회전/확대는 글자 좌측-베이스라인 모서리가 아니라 대략적인 글자 중심을 기준으로 —
+      // 그렇지 않으면 pop/zoom/stamp처럼 큰 배율 변화가 이웃 글자를 덮어버림.
+      const pivotX = (gw || size) * 0.5, pivotY = -size * 0.38;
+      const sx = g.sx == null ? 1 : g.sx, sy = g.sy == null ? 1 : g.sy;
+      if (g.rot || sx !== 1 || sy !== 1) {
+        ctx.translate(pivotX, pivotY);
+        if (g.rot) ctx.rotate(g.rot);
+        ctx.scale(sx, sy);
+        ctx.translate(-pivotX, -pivotY);
+      }
+      ctx.globalAlpha = Math.max(0, Math.min(1, g.a == null ? 1 : g.a));
+      if (g.clip > 0.001) {
+        const up = size * 1.05, down = size * 1.05, halfW = size * 0.6;
+        let rx = -halfW, ry = -up, rw = halfW * 2, rh = up + down;
+        const cVal = Math.min(1, g.clip);
+        if (g.clipDir === 'bottom') rh = (up + down) * (1 - cVal);
+        else if (g.clipDir === 'top') { const hide = (up + down) * cVal; ry += hide; rh -= hide; }
+        else if (g.clipDir === 'left') { const hide = rw * cVal; rx += hide; rw -= hide; }
+        else if (g.clipDir === 'right') rw = rw * (1 - cVal);
+        ctx.beginPath(); ctx.rect(rx, ry, Math.max(0, rw), Math.max(0, rh)); ctx.clip();
+      }
+      const drawCh = g.ch != null ? g.ch : ch;
+      if (g.glitchAmt > 0.02) {
+        ctx.save(); ctx.globalAlpha *= 0.5; ctx.translate(g.glitchAmt * size * 0.16, 0);
+        ctx.font = fontString(L, size); ctx.fillStyle = 'rgba(255,60,90,0.85)'; ctx.fillText(drawCh, 0, 0); ctx.restore();
+        ctx.save(); ctx.globalAlpha *= 0.5; ctx.translate(-g.glitchAmt * size * 0.16, 0);
+        ctx.font = fontString(L, size); ctx.fillStyle = 'rgba(60,220,255,0.85)'; ctx.fillText(drawCh, 0, 0); ctx.restore();
+      }
+      if (g.blur > 0.15) {
+        const prevA = ctx.globalAlpha;
+        for (let k = 0; k < 4; k++) {
+          const ang = k / 4 * Math.PI * 2;
+          ctx.save(); ctx.translate(Math.cos(ang) * g.blur * 0.5, Math.sin(ang) * g.blur * 0.5);
+          ctx.globalAlpha = prevA * 0.16; fillGlyph(ctx, drawCh, size, L, info); ctx.restore();
+        }
+        ctx.globalAlpha = prevA * 0.6; fillGlyph(ctx, drawCh, size, L, info);
+      } else {
+        fillGlyph(ctx, drawCh, size, L, info);
+      }
+      ctx.restore();
+    }
+
+    /* 글자 하나의 enter/exit 상태 계산 */
+    function glyphState(i, N, gi, total, localT, dE, dX, exitStart, enterFn, exitFn, enterOrder, exitOrder, inEnter, inExit, size, time, cx, overallFrac) {
+      const st = { a: 1, sx: 1, sy: 1, dx: 0, dy: 0, rot: 0, blur: 0, clip: 0, clipDir: null, ch: null, glitchAmt: 0 };
+      const info = { size, time, cx, karaokeP: overallFrac, karaokeFrac: total > 1 ? gi / (total - 1) : 0, env: ENV_REF };
+      if (inEnter) {
+        const oi = orderIndex(enterOrder, i, N, gi, total);
+        const p = glyphProgress(localT, oi, dE, dE * 0.55);
+        Object.assign(st, enterFn(p, i, N, info));
+      } else if (inExit) {
+        const oi = orderIndex(exitOrder, i, N, gi, total);
+        const p = glyphProgress(localT - exitStart, oi, dX, dX * 0.55);
+        Object.assign(st, exitFn(p, i, N, info));
+      }
+      return st;
+    }
+    function cursorTrack(L, inEnter, gi, dE, localT, total) {
+      if (L.enter !== 'type' || !inEnter) return false;
+      const revealFrac = Math.max(0, Math.min(1, localT / dE));
+      const idx = Math.min(total - 1, Math.floor(revealFrac * total));
+      return gi === idx;
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *  캡션 1개 렌더
+     * ---------------------------------------------------------------------- */
+    function drawOneCaption(ctx, W, H, t, s, L, scale, stackIndex, env) {
+      let size = L.size * scale;
+      if (L.layout === 'huge') {
+        const lay0 = getLayout(ctx, L, s, size);
+        const fit = Math.min(1, (W * 0.88) / Math.max(1, lay0.maxWidth));
+        if (fit < 1) size *= fit;
+      }
+      const lay = getLayout(ctx, L, s, size);
+      const len = Math.max(0.01, s.t1 - s.t0);
+      const localT = t - s.t0;
+      if (localT < 0 || localT >= len) return;
+      const speed = L.speed || 1;
+      const dE = Math.min(0.6 / speed, len * 0.4);
+      const dX = Math.min(0.4 / speed, len * 0.3);
+      const exitStart = len - dX;
+      const enterFn = ENTER_FX[L.enter] || ENTER_FX.fade;
+      const exitFn = EXIT_FX[L.exit] || EXIT_FX.fade;
+      const enterOrder = ENTER_ORDER[L.enter] || 'lr';
+      const exitOrder = EXIT_ORDER[L.exit] || 'lr';
+      const anchor = anchorFor(L, lay, W, H, size, stackIndex);
+
+      let envAlpha = 1;
+      if (localT < dE) envAlpha = env.EASE.out(Math.max(0, Math.min(1, localT / Math.max(0.001, dE))));
+      if (localT >= exitStart) envAlpha *= 1 - env.EASE.in(Math.max(0, Math.min(1, (localT - exitStart) / Math.max(0.001, dX))));
+
+      drawBackdrop(ctx, L, lay, anchor, size, envAlpha, W);
+
+      const inEnter = localT < dE && L.enter !== 'none';
+      const inExit = localT >= exitStart && L.exit !== 'none';
+      const overallFrac = localT / len;
+      let cursorPos = null;
+
+      if (L.layout === 'vertical') {
+        const colW = size * 1.4, charH = size * 1.22; // 1.4 — 한글 전각 글자폭(~1em)보다 여유있게 둬야 옆 칸과 안 겹침
+        let gi = 0;
+        lay.lines.forEach((line, li) => {
+          const colX = anchor.cx - li * colW;
+          line.chars.forEach((c, i) => {
+            const state = glyphState(i, line.chars.length, gi, lay.totalGlyphs, localT, dE, dX, exitStart, enterFn, exitFn, enterOrder, exitOrder, inEnter, inExit, size, t, 0, overallFrac);
+            const ly = anchor.topY + i * charH + charH * 0.82;
+            const kInfoV = { size, time: t, karaokeP: overallFrac, karaokeFrac: lay.totalGlyphs > 1 ? gi / (lay.totalGlyphs - 1) : 0 };
+            paintGlyph(ctx, c.ch, colX, ly, size, L, state, kInfoV, c.w);
+            if (cursorTrack(L, inEnter, gi, dE, localT, lay.totalGlyphs)) cursorPos = { x: colX, y: ly - size * 0.8, h: size * 0.95 };
+            gi++;
+          });
+        });
+      } else {
+        let gi = 0;
+        lay.lines.forEach((line, li) => {
+          const ly = anchor.topY + li * lay.lineH + lay.lineH * 0.78;
+          const lx0 = anchor.align === 'center' ? anchor.cx - line.width / 2 : anchor.cx;
+          const N = line.chars.length;
+          line.chars.forEach((c, i) => {
+            const cx = N > 1 ? (c.x + c.w / 2) / Math.max(1, line.width) * 2 - 1 : 0;
+            const state = glyphState(i, N, gi, lay.totalGlyphs, localT, dE, dX, exitStart, enterFn, exitFn, enterOrder, exitOrder, inEnter, inExit, size, t, cx, overallFrac);
+            if (L.layout === 'lower' && li > 0) { state.sx *= 0.62; state.sy *= 0.62; state.a *= 0.85; }
+            const lxAbs = lx0 + c.x;
+            const kInfoH = { size, time: t, cx, karaokeP: overallFrac, karaokeFrac: lay.totalGlyphs > 1 ? gi / (lay.totalGlyphs - 1) : 0 };
+            paintGlyph(ctx, c.ch, lxAbs, ly, size, L, state, kInfoH, c.w);
+            if (cursorTrack(L, inEnter, gi, dE, localT, lay.totalGlyphs)) cursorPos = { x: lxAbs + c.w, y: ly - size * 0.78, h: size * 0.9 };
+            gi++;
+          });
+        });
+      }
+
+      if (L.enter === 'type' && inEnter && cursorPos && Math.floor(t * 3) % 2 === 0) {
+        ctx.save(); ctx.globalAlpha = envAlpha; ctx.fillStyle = L.color;
+        ctx.fillRect(cursorPos.x, cursorPos.y, Math.max(2, size * 0.06), cursorPos.h); ctx.restore();
+      }
+      drawLineDecor(ctx, L, lay, anchor, size, envAlpha, localT, dE);
+    }
+
+    /* ---------------------------------------------------------------------- *
+     *  공개 API
+     * ---------------------------------------------------------------------- */
+    function drawCaps2(ctx, W, H, t, items, env) {
+      ENV_REF = env;
+      const scale = W / 960;
+      const active = (items || []).filter(it => it && it.s && it.L && t >= it.s.t0 && t < it.s.t1);
+      const groups = {};
+      active.forEach(it => { (groups[it.L.layout] || (groups[it.L.layout] = [])).push(it); });
+      Object.keys(groups).forEach(layout => {
+        const arr = groups[layout];
+        arr.sort((a, b) => a.s.t0 - b.s.t0); // 오래된 것부터
+        arr.forEach((it, idx) => {
+          const stackIndex = arr.length - 1 - idx; // 0 = 최신(기준 위치)
+          drawOneCaption(ctx, W, H, t, it.s, it.L, scale, stackIndex, env);
+        });
+      });
+    }
+
+    function capLook(base, styleKey) {
+      const preset = CAP_STYLES[styleKey] || {};
+      const { name, desc, ...pl } = preset;
+      return { ...CAP_DEFAULT, ...(base || {}), ...pl };
+    }
+
+    function drawThumbBG(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, '#141822'); g.addColorStop(1, '#05060a');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.save(); ctx.globalAlpha = 0.18; ctx.fillStyle = '#8fb0ff';
+      ctx.beginPath(); ctx.ellipse(W * 0.78, H * 0.28, W * 0.28, H * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    function capThumb(canvas, styleKey, t, env) {
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      drawThumbBG(ctx, W, H);
+      const preset = CAP_STYLES[styleKey] || {};
+      const L = capLook(CAP_DEFAULT, styleKey);
+      L.size = L.size * (L.layout === 'huge' ? 1.25 : L.layout === 'vertical' ? 1.6 : 2.3);
+      if (L.layout === 'bottom') L.y = Math.max(L.y, 12);
+      const text = preset.layout === 'huge' ? 'ARCH\n아크' : '안녕, 반가워요';
+      const s = { t0: 0, t1: 3.2, text };
+      drawCaps2(ctx, W, H, t, [{ s, L }], env);
+    }
+
+    // ══════════════════════════════════
+    //  촬영 스튜디오 v3 — 원클릭 연출 · 전환 갤러리 · 자막 프리셋 · 장면별 카메라/전환 · 프레임 단위 영상
+    // ══════════════════════════════════
+    const TRANS1 = [
+        ['cut', '컷', '바로 바뀌어요', '기본'],
+        ['fade', '크로스페이드', '부드럽게 겹쳐요', '기본'],
+        ['blur', '블러 디졸브', '흐려지며 바뀌어요', '기본'],
+        ['black', '암전', '영화처럼 까맣게', '빛·필름'],
+        ['white', '화이트 플래시', '하얗게 번쩍', '빛·필름'],
+        ['flash', '줌 플래시', '번쩍 튀며 확대', '빛·필름'],
+        ['slide', '슬라이드', '옆으로 밀어요', '역동'],
+        ['up', '위로 밀기', '위로 밀어 올려요', '역동'],
+        ['zoom', '줌 스루', '빨려 들어가요', '역동'],
+        ['spin', '스핀', '음방처럼 돌아요', '역동'],
+        ['iris', '원형 열기', '동그랗게 열려요', '그래픽'],
+        ['blinds', '블라인드', '세로 띠로 열려요', '그래픽'],
+        ['glitch', '글리치', '지지직 어긋나요', '디지털']
+    ];
+    const TR_GROUPS = ['기본', '역동', '그래픽', '빛·필름', '디지털'];
+    const TRANS_ALL = () => [...TRANS1, ...(typeof TRANS2 !== 'undefined' ? TRANS2 : [])];
+    const trExists = k => TRANS_ALL().some(t => t[0] === k);
+    const transName = k => k === 'mix' ? '자동 섞기' : ((TRANS_ALL().find(x => x[0] === k) || [k, k])[1]);
+    const MIX_POOL = ['whip', 'zoomblur', 'flash', 'rgbsplit', 'slices', 'ink', 'diag', 'cube', 'burn', 'spin', 'glitch', 'doors', 'stripes', 'checker', 'pushL', 'heart', 'zoom'];
+    const hash1 = (i, k = 0, s = 0) => { const x = Math.sin(i * 127.1 + k * 311.7 + s * 74.7) * 43758.5453; return x - Math.floor(x); };
+    function mixPick(i) {
+        const pool = MIX_POOL.filter(trExists); if (!pool.length) return 'fade';
+        const at = j => Math.floor(hash1(j, 5, MOT.seed || 0) * pool.length);
+        let a = at(i); if (i > 0 && a === at(i - 1)) a = (a + 1) % pool.length; // 같은 전환이 연달아 나오지 않게
+        return pool[a];
+    }
+    function transFor(i) { // i번 장면 → i+1번 장면으로 넘어갈 때
+        const c = MOT.clips[i]; let k = (c && c.tr) || MOT.trans || 'fade';
+        if (k === 'mix') k = mixPick(i);
+        return trExists(k) ? k : 'fade';
+    }
+    const TR_ENV = (idx) => ({ EASE, blurDraw, seed: ((MOT.seed || 0) * 31 + idx * 7) | 0, accent: (MOT.cap && MOT.cap.accent) || '#ffd24a' });
+
+    // ── 장면별 카메라 ──
+    const presetKeys = n => PRESETS[n].k.map(k => ({ t: k.t, z: k.z ?? 1, x: k.x ?? 0, y: k.y ?? 0, r: k.r ?? 0, b: k.b ?? 0, e: k.e || 'io' }));
+    function setClipCam(c, n) {
+        if (!n || !PRESETS[n]) { delete c.cam; delete c.keys; delete c.sh; return; }
+        c.cam = n; c.keys = presetKeys(n); c.sh = PRESETS[n].sh || 0;
+    }
+    function keysRef(i) { const c = eachMode() && MOT.clips[i]; return c && c.keys ? c.keys : MOT.keys; }
+    function shakeFor(i) { const c = eachMode() && MOT.clips[i]; return c && c.keys ? (c.sh || 0) : MOT.shake; }
+    const ciNow = () => MOT.clips.length ? clipAt(motT).i : 0;
+    let presetTgt = 'all';
+
+    // ── 원클릭 연출(룩) ──
+    const LOOKS = {
+        cinema:  { name: '시네마틱', desc: '천천히 밀고 암전으로 · 영화 톤', sw: ['#0c0e13', '#c9a86a'], cams: ['켄번즈 (천천히 밀기)', '천천히 줌인', '돌리 슬라이드', '대각선 밀기'], trans: ['black', 'blur', 'fade', 'burn'], td: .9, fx: [], pt: 'dust', pd: 35, pcol: '#ffe7c2', ov: 'cine', grain: true, mb: 35, cap: 'cinema', accent: '#e6c27a' },
+        mv:      { name: '뮤직비디오', desc: '휩팬 · 색수차 · 빛망울', sw: ['#1a0b2e', '#ff4fa3'], cams: ['음방 스핀 인 (빠르게→느리게)', '펀치 줌 (쿵)', '줌 플래시', '돌리 인 (확 다가가기)'], trans: ['whip', 'rgbsplit', 'zoomblur', 'flash', 'slices'], td: .5, fx: ['rgb', 'sweep'], fxAmt: 40, pt: 'bokeh', pd: 45, pcol: '#ffc2e6', ov: 'none', grain: false, mb: 55, cap: 'mv', accent: '#ff4fa3' },
+        stage:   { name: '음악방송', desc: '회전 · 비트 줌 · LIVE 틀', sw: ['#0b1a33', '#4fd1ff'], cams: ['음방 360 회전', '음방 비트 줌 (쿵쿵)', '음방 와이드 → 클로즈업', '음방 스윙 (좌우 흔들)'], trans: ['spin', 'flash', 'zoomblur', 'doors'], td: .55, fx: ['pulse'], fxAmt: 40, pt: 'sparkle', pd: 55, pcol: '#dff4ff', ov: 'show', grain: false, mb: 50, cap: 'netflix', accent: '#4fd1ff' },
+        vlog:    { name: '감성 브이로그', desc: '잔잔한 흔들림 · 빛 번짐', sw: ['#f3e3d3', '#d98a5f'], cams: ['브이로그 (잔잔한 흔들림)', '천천히 줌인', '대각선 밀기', '틸트 아래 → 위'], trans: ['fade', 'burn', 'blur', 'ink'], td: .8, fx: ['breathe'], fxAmt: 35, pt: 'leak', pd: 45, pcol: '#ffcf9e', ov: 'none', grain: true, mb: 30, cap: 'emo', accent: '#ffcf9e' },
+        retro:   { name: '레트로 VHS', desc: '비디오테이프 · 모자이크', sw: ['#2a2033', '#ff6b3d'], cams: ['핸드헬드 (흔들림)', '지그재그 팬', '줌 플래시'], trans: ['glitch', 'pixel', 'rgbsplit', 'tv'], td: .5, fx: ['vhs', 'flicker'], fxAmt: 55, pt: 'none', ov: 'vf', grain: true, mb: 20, cap: 'typewriter', accent: '#ff6b3d' },
+        neon:    { name: '사이버 네온', desc: '글리치 · 네온 · 색수차', sw: ['#070b1d', '#3dfcff'], cams: ['회전 줌', '돌리 인 (확 다가가기)', '음방 스핀 인 (빠르게→느리게)'], trans: ['glitch', 'rgbsplit', 'slices', 'zoomblur'], td: .45, fx: ['rgb', 'pulse'], fxAmt: 45, pt: 'dust', pd: 70, pcol: '#8ff6ff', ov: 'vig', grain: false, mb: 45, cap: 'neon', accent: '#3dfcff' },
+        romance: { name: '로맨틱', desc: '하트 · 벚꽃 · 둥실', sw: ['#fbe4ec', '#ff7aa8'], cams: ['초점 나갔다 들어오기', '천천히 줌인', '슬로우 리빌 (흐림 → 선명)'], trans: ['heart', 'fade', 'blur'], td: .8, fx: ['float'], fxAmt: 45, pt: 'sakura', pd: 45, ov: 'vig', grain: false, mb: 30, cap: 'romantic', accent: '#ff8fb5' },
+        variety: { name: '예능', desc: '쿵 줌 · 번쩍 · 굵은 자막', sw: ['#ffe24a', '#ff3b30'], cams: ['펀치 줌 (쿵)', '줌 플래시', '음방 비트 줌 (쿵쿵)'], trans: ['flash', 'whip', 'checker', 'stripes'], td: .45, fx: ['impact'], fxAmt: 55, pt: 'sparkle', pd: 40, pcol: '#fff3b0', ov: 'none', grain: false, mb: 45, cap: 'variety', accent: '#ffd21f' },
+        docu:    { name: '다큐 · 뉴스', desc: '담백한 팬 · 이름표 자막', sw: ['#1d2530', '#e9eef4'], cams: ['켄번즈 (천천히 밀기)', '패닝 좌 → 우', '틸트 위 → 아래'], trans: ['pushL', 'cover', 'slide', 'fade'], td: .6, fx: [], pt: 'none', ov: 'none', grain: false, mb: 30, cap: 'news', accent: '#2f7cf6' },
+        winter:  { name: '겨울 동화', desc: '눈 · 화이트 · 손글씨', sw: ['#e8f1fb', '#9cc3ea'], cams: ['천천히 줌인', '슬로우 리빌 (흐림 → 선명)', '틸트 위 → 아래'], trans: ['white', 'ink', 'fade'], td: .9, fx: ['breathe'], fxAmt: 30, pt: 'snow', pd: 60, ov: 'vig', grain: false, mb: 30, cap: 'diary', accent: '#9cc3ea' },
+        thriller:{ name: '스릴러', desc: '흔들림 · 깜빡임 · 흑백', sw: ['#101010', '#b3121a'], cams: ['핸드헬드 (흔들림)', '초점 나갔다 들어오기', '돌리 인 (확 다가가기)'], trans: ['black', 'glitch', 'shatter'], td: .6, fx: ['flicker', 'bw', 'impact'], fxAmt: 50, pt: 'none', ov: 'vig', grain: true, mb: 40, cap: 'glitch', accent: '#e0202a' },
+        action:  { name: '액션 트레일러', desc: '돌진 · 파편 · 불티', sw: ['#1b1208', '#ff8a1f'], cams: ['돌리 인 (확 다가가기)', '줌 플래시', '펀치 줌 (쿵)', '회전 줌'], trans: ['whip', 'shatter', 'zoomblur', 'flash'], td: .45, fx: ['impact'], fxAmt: 60, pt: 'embers', pd: 60, ov: 'cine', grain: true, mb: 60, cap: 'title', accent: '#ff8a1f' },
+        fancam:  { name: '직캠', desc: '세로 9:16 · FANCAM 틀', sw: ['#0e0e14', '#ffffff'], cams: ['직캠 (세로 · 흔들림)', '직캠 줌인 포커스'], trans: ['flash', 'spin', 'zoomblur'], td: .5, fx: ['pulse'], fxAmt: 30, pt: 'sparkle', pd: 35, ov: 'fancam', grain: false, mb: 40, cap: 'idol', accent: '#ffffff', ratio: '9:16' },
+        diary:   { name: '일기장', desc: '포근한 먼지 · 손글씨', sw: ['#efe6d6', '#8a6f4e'], cams: ['켄번즈 (천천히 밀기)', '천천히 줌아웃', '대각선 밀기'], trans: ['fade', 'stripes', 'ink'], td: .8, fx: ['float'], fxAmt: 30, pt: 'dust', pd: 45, pcol: '#fff1d6', ov: 'none', grain: true, mb: 30, cap: 'diary', accent: '#c79b6a' }
+    };
+    function capStyleKey(k) { // 자막 프리셋 이름이 조금 달라도 찾아줌
+        if (typeof CAP_STYLES === 'undefined') return '';
+        if (CAP_STYLES[k]) return k;
+        const alias = { cinema: ['cinema_band'], mv: ['mv_title'], netflix: ['netflix', 'basic'], emo: ['mj_soft'], typewriter: ['typewriter'], neon: ['neon_sign'], romantic: ['romantic'], variety: ['variety'], news: ['news_lower'], diary: ['handwriting'], glitch: ['glitch_fx'], title: ['stamp_style', 'mv_title'], idol: ['idol_cam'] };
+        for (const a of alias[k] || []) if (CAP_STYLES[a]) return a;
+        const hit = Object.keys(CAP_STYLES).find(x => x.toLowerCase().includes(String(k).toLowerCase()));
+        return hit || '';
+    }
+    function capApplyStyle(key, accent) {
+        const sk = capStyleKey(key); if (!sk) return;
+        const P = { ...CAP_STYLES[sk] }; delete P.name; delete P.desc;
+        Object.assign(MOT.cap, P, { style: sk });
+        if (accent && !CAP_STYLES[sk].accent) MOT.cap.accent = accent;
+        loadFont(MOT.cap.font).then(motDraw);
+    }
+    function applyLook(key, opt = {}) {
+        const L = LOOKS[key]; if (!L) return;
+        const wasFancam = MOT.look === 'fancam';
+        MOT.look = key;
+        Object.assign(MOT, { transDur: L.td ?? .6, fx: [...(L.fx || [])], fxAmt: L.fxAmt ?? 50, pt: L.pt || 'none', pd: L.pd ?? 50, pcol: L.pcol || '#ffe7c2', ov: L.ov || 'none', grain: !!L.grain, mb: L.mb ?? 40 });
+        if (L.ratio) MOT.ratio = L.ratio; else if (wasFancam && MOT.ratio === '9:16') MOT.ratio = '16:9';
+        const cams = L.cams.filter(n => PRESETS[n]), trs = L.trans.filter(trExists);
+        const off = opt.shuffle ? Math.floor(Math.random() * 97) : 0;
+        MOT.keys = presetKeys(cams[0]); MOT.shake = PRESETS[cams[0]].sh || 0;
+        if (MOT.clips.length > 1) {
+            MOT.camMode = 'each';
+            MOT.trans = trs[0] || 'fade';
+            MOT.clips.forEach((c, i) => {
+                let n = cams[(i + off) % cams.length], t = trs[(i + off) % Math.max(1, trs.length)] || '';
+                if (opt.wild && Math.random() < .3) { const all = Object.keys(PRESETS).filter(p => !/^직캠/.test(p)); n = all[Math.floor(Math.random() * all.length)] || n; }
+                if (opt.wild && Math.random() < .3) t = 'mix';
+                setClipCam(c, n); c.tr = t;
+            });
+        } else MOT.clips.forEach(c => { delete c.tr; setClipCam(c, ''); });
+        if (L.cap) { capApplyStyle(L.cap, L.accent); MOT.subs.forEach(s => delete s.style); }
+        if (L.accent) MOT.cap.accent = L.accent;
+        motT = 0; motSyncUI(); motPlay(true); saveSoon();
+    }
+    function omakase() {
+        if (!motReady()) return toast('먼저 사진을 넣어 주세요');
+        const pool = Object.keys(LOOKS).filter(k => k !== MOT.look && k !== 'fancam');
+        const k = pool[Math.floor(Math.random() * pool.length)];
+        MOT.seed = (Math.random() * 1e6) | 0;
+        applyLook(k, { shuffle: true, wild: true });
+        toast(`알아서 연출: ${LOOKS[k].name} 느낌으로 섞었어요 — 한 번 더 누르면 또 바뀌어요`);
+    }
+    function lookUI() {
+        const g = $('lookGrid'); if (!g) return;
+        if (!g.children.length) g.innerHTML = Object.entries(LOOKS).map(([k, L]) => `<button class="look-card" data-look="${k}" style="--l1:${L.sw[0]};--l2:${L.sw[1]}"><i class="look-sw"></i><b>${esc(L.name)}</b><span>${esc(L.desc)}</span></button>`).join('');
+        g.querySelectorAll('.look-card').forEach(b => b.classList.toggle('on', b.dataset.look === MOT.look));
+    }
+    $('lookGrid').addEventListener('click', e => { const b = e.target.closest('[data-look]'); if (!b) return; if (!motReady()) return toast('먼저 사진을 넣어 주세요'); applyLook(b.dataset.look); toast(`${LOOKS[b.dataset.look].name} — 카메라 · 전환 · 효과 · 자막을 맞췄어요`); });
+    $('motOmk').addEventListener('click', omakase);
+
+    // ── 전환 갤러리 (내 사진 두 장으로 미리보기) ──
+    const trThumb = { A: document.createElement('canvas'), B: document.createElement('canvas'), key: '' };
+    const TRW = 112, TRH = 63;
+    function trSamples() {
+        const k = MOT.clips.map(c => c.id).slice(0, 2).join('|') + '|' + MOT.ratio;
+        if (trThumb.key === k) return; trThumb.key = k;
+        [trThumb.A, trThumb.B].forEach((cv, j) => {
+            cv.width = TRW; cv.height = TRH; const x = cv.getContext('2d');
+            const S = CLIPSRC.get((MOT.clips[j] || MOT.clips[0] || {}).id);
+            if (S) { const kk = Math.max(TRW / S.base.width, TRH / S.base.height); x.drawImage(S.base, (TRW - S.base.width * kk) / 2, (TRH - S.base.height * kk) / 2, S.base.width * kk, S.base.height * kk); if (j === 1 && !MOT.clips[1]) { x.fillStyle = 'rgba(40,60,90,.55)'; x.fillRect(0, 0, TRW, TRH); } }
+            else { const gr = x.createLinearGradient(0, 0, TRW, TRH); gr.addColorStop(0, j ? '#7aa6d8' : '#e9b98a'); gr.addColorStop(1, j ? '#27415f' : '#8a4d3a'); x.fillStyle = gr; x.fillRect(0, 0, TRW, TRH); x.fillStyle = 'rgba(255,255,255,.85)'; x.font = `700 ${TRH * .5}px Pretendard,sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(j ? 'B' : 'A', TRW / 2, TRH / 2); }
+        });
+    }
+    function trDrawThumb(cv, k, p) {
+        const x = cv.getContext('2d');
+        if (k === 'mix') { const ks = MIX_POOL.filter(trExists); const kk = ks[Math.floor(p * 3.999) % ks.length] || 'fade'; return transComp(x, TRW, TRH, trThumb.A, trThumb.B, (p * 4) % 1, kk, 0); }
+        transComp(x, TRW, TRH, trThumb.A, trThumb.B, p, k, 0);
+    }
+    let trAnim = null;
+    function trUI() {
+        const g = $('trGrid'); if (!g) return;
+        const many = MOT.clips.length > 1;
+        $('trNote').style.display = many ? 'none' : '';
+        $('trMore').style.display = many ? '' : 'none';
+        if (!g.children.length || g.dataset.n !== String(TRANS_ALL().length)) {
+            g.dataset.n = TRANS_ALL().length;
+            const cell = ([k, n, d]) => `<button class="tr-cell" data-tr="${k}" title="${esc(d)}"><canvas width="${TRW}" height="${TRH}"></canvas><span>${esc(n)}</span></button>`;
+            g.innerHTML = cell(['mix', '자동 섞기', '장면마다 화려한 전환을 골라 섞어요']) + TR_GROUPS.map(gr => { const L = TRANS_ALL().filter(t => (t[3] || '기본') === gr); return L.length ? `<div class="tr-h">${gr}</div>` + L.map(cell).join('') : ''; }).join('');
+        }
+        trSamples();
+        g.querySelectorAll('.tr-cell').forEach(b => { b.classList.toggle('on', b.dataset.tr === MOT.trans); trDrawThumb(b.querySelector('canvas'), b.dataset.tr, b.dataset.tr === 'cut' ? 1 : .5); });
+    }
+    function trHover(b) {
+        cancelAnimationFrame(trAnim && trAnim.raf); if (!b) { trAnim = null; return; }
+        const cv = b.querySelector('canvas'), k = b.dataset.tr, t0 = performance.now(), per = k === 'mix' ? 3200 : 1300;
+        const loop = now => { const u = ((now - t0) % (per + 500)) / per; trDrawThumb(cv, k, Math.min(1, u)); trAnim.raf = requestAnimationFrame(loop); };
+        trAnim = { b, raf: requestAnimationFrame(loop) };
+    }
+    $('trGrid').addEventListener('pointerover', e => { const b = e.target.closest('.tr-cell'); if (b && (!trAnim || trAnim.b !== b)) { if (trAnim) trDrawThumb(trAnim.b.querySelector('canvas'), trAnim.b.dataset.tr, .5); trHover(b); } });
+    $('trGrid').addEventListener('pointerleave', () => { if (trAnim) { const b = trAnim.b; trHover(null); trDrawThumb(b.querySelector('canvas'), b.dataset.tr, .5); } });
+    $('trGrid').addEventListener('click', e => {
+        const b = e.target.closest('.tr-cell'); if (!b) return;
+        if (MOT.clips.length < 2) return toast('사진을 2장 이상 넣으면 전환이 생겨요');
+        MOT.trans = b.dataset.tr; MOT.clips.forEach(c => delete c.tr);
+        if (!MOT.seed) MOT.seed = (Math.random() * 1e6) | 0;
+        // 첫 전환 바로 앞에서 재생해 보여줌
+        motT = Math.max(0, clipStart(1) - MOT.transDur - .4);
+        motSyncUI(); motPlay(true); saveSoon();
+        toast(`${transName(MOT.trans)} — 모든 장면 사이에 넣었어요`);
+    });
+
+    // ── 자막 프리셋 갤러리 ──
+    const CAP_ENV = { fontFace, EASE, blurDraw };
+    const CGW = 150, CGH = 84;
+    let capAnim = null;
+    function capGalUI() {
+        const g = $('capGal'); if (!g || typeof CAP_STYLES === 'undefined') return;
+        const keys = Object.keys(CAP_STYLES);
+        if (g.dataset.n !== String(keys.length)) {
+            g.dataset.n = keys.length;
+            g.innerHTML = keys.map(k => `<button class="cap-cell" data-cs="${k}" title="${esc(CAP_STYLES[k].desc || '')}"><canvas width="${CGW * 2}" height="${CGH * 2}"></canvas><span>${esc(CAP_STYLES[k].name || k)}</span></button>`).join('');
+            Promise.all(keys.map(k => { const f = CAP_STYLES[k].font || 'pretendard'; return loadFont(f).then(() => fontText(f, '안녕, 반가워요ARCH아크')); })).then(() => capGalUI());
+        }
+        g.querySelectorAll('.cap-cell').forEach(b => { b.classList.toggle('on', b.dataset.cs === MOT.cap.style); if (!capAnim || capAnim.b !== b) try { capThumb(b.querySelector('canvas'), b.dataset.cs, 1.4, CAP_ENV); } catch (e) {} });
+    }
+    function capHover(b) {
+        cancelAnimationFrame(capAnim && capAnim.raf); if (!b) { capAnim = null; return; }
+        const cv = b.querySelector('canvas'), k = b.dataset.cs, t0 = performance.now();
+        const loop = now => { const u = ((now - t0) / 1000) % 3.2; try { capThumb(cv, k, u, CAP_ENV); } catch (e) {} capAnim.raf = requestAnimationFrame(loop); };
+        capAnim = { b, raf: requestAnimationFrame(loop) };
+    }
+    $('capGal').addEventListener('pointerover', e => { const b = e.target.closest('.cap-cell'); if (b && (!capAnim || capAnim.b !== b)) { const pb = capAnim && capAnim.b; capHover(b); if (pb) try { capThumb(pb.querySelector('canvas'), pb.dataset.cs, 1.4, CAP_ENV); } catch (_) {} } });
+    $('capGal').addEventListener('pointerleave', () => { if (capAnim) { const b = capAnim.b; capHover(null); try { capThumb(b.querySelector('canvas'), b.dataset.cs, 1.4, CAP_ENV); } catch (_) {} } });
+    $('capGal').addEventListener('click', e => {
+        const b = e.target.closest('.cap-cell'); if (!b) return;
+        capApplyStyle(b.dataset.cs); MOT.subs.forEach(s => delete s.style);
+        if (!MOT.subs.some(s => s.text.trim())) toast('자막 스타일을 골랐어요 — 아래에 자막을 넣으면 보여요');
+        else { const s = MOT.subs.find(s => s.text.trim()); motT = clamp(s.t0 + .05, 0, MOT.dur); motPlay(true); }
+        motSyncUI(); saveSoon();
+    });
+
+    // ── 자막 빠르게 넣기 ──
+    $('capPerClip').addEventListener('click', () => {
+        if (!MOT.clips.length) return toast('먼저 사진을 넣어 주세요');
+        if (MOT.subs.some(s => s.text.trim()) && !confirm('지금 자막을 지우고 장면마다 한 줄씩 새로 만들까요?')) return;
+        MOT.subs = MOT.clips.map((c, i) => { const a = MOT.clips.length > 1 ? clipStart(i) : 0, d = MOT.clips.length > 1 ? c.dur : MOT.dur; return { t0: r1(a + Math.min(.25, d * .1)), t1: r1(a + d - Math.min(.25, d * .1)), text: '' }; });
+        capListUI(); saveSoon();
+        const ta = document.querySelector('#capList .cap-row textarea'); if (ta) ta.focus({ preventScroll: isTouch });
+        toast('장면마다 자막 칸을 만들었어요 — 내용만 적으면 돼요');
+    });
+    $('capBulkBtn').addEventListener('click', () => { const b = $('capBulkBox'); b.style.display = b.style.display === 'none' ? '' : 'none'; if (b.style.display === '') $('capBulk').focus({ preventScroll: isTouch }); });
+    $('capBulkGo').addEventListener('click', () => {
+        const lines = $('capBulk').value.split('\n').map(s => s.trim()).filter(Boolean).map(s => s.replace(/\s*\/\s*/g, '\n'));
+        if (!lines.length) return toast('한 줄에 자막 하나씩 적어 주세요');
+        if (MOT.subs.some(s => s.text.trim()) && !confirm('지금 자막을 지우고 새로 만들까요?')) return;
+        const n = lines.length, perClip = MOT.clips.length > 1 && n === MOT.clips.length;
+        MOT.subs = lines.map((text, i) => {
+            if (perClip) { const a = clipStart(i), d = MOT.clips[i].dur; return { t0: r1(a + Math.min(.25, d * .1)), t1: r1(a + d - Math.min(.25, d * .1)), text }; }
+            const seg = MOT.dur / n; return { t0: r1(i * seg + Math.min(.15, seg * .08)), t1: r1((i + 1) * seg - Math.min(.15, seg * .08)), text };
+        });
+        $('capBulk').value = ''; $('capBulkBox').style.display = 'none';
+        fontTextAll().then(() => motDraw());
+        capListUI(); motT = clamp(MOT.subs[0].t0 + .05, 0, MOT.dur); motPlay(true); saveSoon();
+        toast(perClip ? `장면 ${n}개에 자막을 하나씩 넣었어요` : `자막 ${n}개를 영상 길이에 고르게 나눴어요`);
+    });
+
+    // ── 간편 / 세세하게 ──
+    function motUiSet(v) {
+        document.body.classList.toggle('mot-easy', v === 'easy');
+        document.querySelectorAll('#motUi button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+        try { localStorage.setItem('arch_mot_ui', v); } catch (e) {}
+    }
+    $('motUi').addEventListener('click', e => { const v = e.target.dataset.v; if (v) { motUiSet(v); if (v === 'pro') clipListUI(); } });
+    motUiSet((() => { try { return localStorage.getItem('arch_mot_ui') || 'easy'; } catch (e) { return 'easy'; } })());
+    $('presetTgt').addEventListener('click', e => { const v = e.target.dataset.v; if (!v) return; presetTgt = v; document.querySelectorAll('#presetTgt button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); });
+
+    // ── 영상: 프레임 단위 인코딩 (WebCodecs + mp4-muxer) — 무거운 효과도 끊김 없이, 실제 시간보다 빨리 ──
+    let muxLib = null;
+    async function renderMusic(D, sr) {
+        const buf = await musBuffer(), m = MOT.mus;
+        const oac = new OfflineAudioContext(2, Math.max(1, Math.ceil(D * sr)), sr);
+        const src = oac.createBufferSource(), g = oac.createGain();
+        src.buffer = buf; src.loop = !!m.loop; src.connect(g); g.connect(oac.destination);
+        g.gain.setValueAtTime(m.fin ? 0 : m.vol, 0);
+        if (m.fin) g.gain.linearRampToValueAtTime(m.vol, Math.min(1, D / 3));
+        if (m.fout) { g.gain.setValueAtTime(m.vol, Math.max(.1, D - 1.5)); g.gain.linearRampToValueAtTime(0, D); }
+        src.start(0, Math.min(m.start, Math.max(0, (buf.duration || 1) - .1)));
+        return oac.startRendering();
+    }
+    async function exportVidWC(btn) {
+        if (!muxLib) muxLib = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.mjs');
+        const { Muxer, ArrayBufferTarget } = muxLib;
+        const { W, H } = vidDims(), fps = +(MOT.vfps || 30), N = Math.max(2, Math.round(MOT.dur * fps));
+        const bitrate = Math.round(W * H * fps * (+MOT.vq >= 1080 ? .2 : .24));
+        let vcfg = null;
+        for (const codec of ['avc1.640033', 'avc1.640028', 'avc1.4d0028', 'avc1.42E01F']) {
+            const cfg = { codec, width: W, height: H, bitrate, framerate: fps };
+            try { if ((await VideoEncoder.isConfigSupported(cfg)).supported) { vcfg = cfg; break; } } catch (e) {}
+        }
+        if (!vcfg) throw new Error('no-video-codec');
+        const withMus = !!(MOT.mus && musKeyLoaded === MOT.mus.key);
+        let audio = null, acfg = null;
+        if (withMus && window.AudioEncoder) {
+            btn.textContent = '음악 준비 중…';
+            for (const codec of ['mp4a.40.2', 'opus']) {
+                const cfg = { codec, sampleRate: 48000, numberOfChannels: 2, bitrate: 192000 };
+                try { if ((await AudioEncoder.isConfigSupported(cfg)).supported) { acfg = cfg; break; } } catch (e) {}
+            }
+            if (acfg) audio = await renderMusic(MOT.dur, 48000);
+        }
+        if (withMus && !acfg) throw new Error('no-audio-codec');
+        const target = new ArrayBufferTarget();
+        const muxer = new Muxer({ target, fastStart: 'in-memory', firstTimestampBehavior: 'offset', video: { codec: 'avc', width: W, height: H, frameRate: fps }, audio: acfg ? { codec: acfg.codec.startsWith('mp4a') ? 'aac' : 'opus', sampleRate: 48000, numberOfChannels: 2 } : undefined });
+        let err = null;
+        const ve = new VideoEncoder({ output: (ch, meta) => muxer.addVideoChunk(ch, meta), error: e => err = e });
+        ve.configure(vcfg);
+        const c = document.createElement('canvas'); c.width = W; c.height = H; const ctx = c.getContext('2d');
+        for (let i = 0; i < N; i++) {
+            if (err) throw err;
+            renderMot(ctx, W, H, (i / N) * MOT.dur, true);
+            const f = new VideoFrame(c, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+            ve.encode(f, { keyFrame: i % (fps * 2) === 0 }); f.close();
+            while (ve.encodeQueueSize > 6) await new Promise(r => setTimeout(r, 4));
+            if (i % 2 === 0) { btn.textContent = `영상 만드는 중 ${Math.round((i + 1) / N * 100)}%`; prog((i + 1) / N); await new Promise(r => setTimeout(r, 0)); }
+        }
+        await ve.flush(); ve.close(); if (err) throw err;
+        if (acfg && audio) {
+            const ae = new AudioEncoder({ output: (ch, meta) => muxer.addAudioChunk(ch, meta), error: e => err = e });
+            ae.configure(acfg);
+            const sr = 48000, L = audio.length, a0 = audio.getChannelData(0), a1 = audio.numberOfChannels > 1 ? audio.getChannelData(1) : a0, blk = 4800;
+            for (let o = 0; o < L; o += blk) {
+                const n = Math.min(blk, L - o), data = new Float32Array(n * 2); data.set(a0.subarray(o, o + n), 0); data.set(a1.subarray(o, o + n), n);
+                const ad = new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: n, numberOfChannels: 2, timestamp: Math.round(o * 1e6 / sr), data });
+                ae.encode(ad); ad.close();
+            }
+            await ae.flush(); ae.close(); if (err) throw err;
+        }
+        muxer.finalize();
+        return { blob: new Blob([target.buffer], { type: 'video/mp4' }), W, H, fps, withMus: !!(acfg && audio) };
+    }
 
     const MOT_API = {
         async onShow() { await prepAll(); await musLoad(); musUI(); clipListUI(); motDraw(); },
