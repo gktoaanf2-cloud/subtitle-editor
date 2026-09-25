@@ -421,6 +421,15 @@
         #capBulk{width:100%;resize:vertical;font-family:inherit;font-size:.74rem;}
         @media (max-width:560px){.tr-grid{grid-template-columns:repeat(3,1fr);}.look-card span{display:none;}}
 
+        #saveSheet{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .25s;}
+        #saveSheet.on{opacity:1;pointer-events:auto;}
+        #saveSheet .ss-box{background:var(--panel);border:1px solid var(--bdr);max-width:520px;width:100%;max-height:88vh;display:flex;flex-direction:column;gap:10px;padding:16px;}
+        #saveSheet .ss-h{font-weight:700;letter-spacing:.5px;}
+        #saveSheet .ss-imgs{overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:0;}
+        #saveSheet .ss-imgs img{width:100%;height:auto;display:block;border:1px solid var(--bdr-l);-webkit-touch-callout:default;}
+        #saveSheet .ss-note{font-size:.72rem;color:var(--tx-m);}
+        #saveSheet .ss-btns{display:flex;gap:8px;}
+        #saveSheet .ss-btns .btn{flex:1;}
     </style>
 </head>
 <body>
@@ -1037,22 +1046,75 @@
     noiseC.width = 300; noiseC.height = 300;
     (() => { const nc = noiseC.getContext('2d'), nd = nc.createImageData(300, 300); for (let i = 0; i < nd.data.length; i += 4) { const v = Math.random() * 255; nd.data[i] = v; nd.data[i + 1] = v; nd.data[i + 2] = v; nd.data[i + 3] = 18; } nc.putImageData(nd, 0, 0); })();
 
-    // 저장(내려받기) — 폰에선 공유 시트(사진에 저장), PC에선 다운로드
+    // 저장(내려받기) — 모든 기기에서 바로 다운로드 (공유 창 사용 안 함)
     const isTouch = matchMedia('(hover:none)').matches;
-    async function saveBlob(blob, name) {
-        if (isTouch && navigator.canShare) {
-            try {
-                const file = new File([blob], name, { type: blob.type });
-                if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
-            } catch (e) { if (e && e.name === 'AbortError') return; }
-        }
+    function dlBlob(blob, name) {
         const a = document.createElement('a'), u = URL.createObjectURL(blob);
-        a.download = name; a.href = u; document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(u), 4000);
+        a.download = name; a.href = u; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 60000);
     }
+    async function saveBlob(blob, name) { dlBlob(blob, name); }
     const canvasBlob = (c, type = 'image/png', q) => new Promise(r => c.toBlob(r, type, q));
     async function saveCanvas(c, name) { const b = await canvasBlob(c); if (!b) { toast('이미지가 너무 커서 만들 수 없어요'); return; } await saveBlob(b, name); }
 
+    // 기기가 만들 수 있는 캔버스 한도 (폰: 가로·세로 8192, 넓이 1600만 px)
+    const CV_MAXD = isTouch ? 8192 : 16384, CV_MAXA = isTouch ? 16e6 : 100e6;
+    function colPrevK(W, H) { const d = isTouch ? 4096 : 8192, ar = isTouch ? 8e6 : 24e6; return Math.min(1, d / W, d / H, Math.sqrt(ar / (W * H))); }
+    // 세로로 긴 콜라주는 사진 사이 경계에서 끊어 여러 장으로 (한 장이 한도를 넘을 때만)
+    function colCuts(L, k) {
+        const lim = Math.floor(Math.min(CV_MAXD, CV_MAXA / (L.W * k)) / k), H = L.H;
+        if (H <= lim) return [[0, H]];
+        const edges = [...new Set(L.slots.map(sl => sl.y + sl.h))].sort((x, y) => x - y);
+        const out = []; let y0 = 0;
+        while (y0 < H) {
+            let y1 = Math.min(H, y0 + lim);
+            if (y1 < H) { const e = edges.filter(v => v > y0 + lim * .35 && v <= y1); if (e.length) y1 = e[e.length - 1]; }
+            out.push([y0, y1]);
+            y0 = y1;
+        }
+        return out;
+    }
+    // 저장 안내 창: 공유 권한이 끊겼을 때(파일을 만드는 동안 시간이 지남) 한 번 더 눌러 저장
+    function saveSheet(files) {
+        let el = $('saveSheet');
+        if (!el) {
+            el = document.createElement('div'); el.id = 'saveSheet';
+            el.innerHTML = '<div class="ss-box"><div class="ss-h"></div><div class="ss-imgs"></div><div class="ss-note">버튼이 안 되면 사진을 길게 눌러 저장하세요</div><div class="ss-btns"><button class="btn btn-p" id="ssGo">저장하기</button><button class="btn" id="ssX">닫기</button></div></div>';
+            document.body.appendChild(el);
+            el.addEventListener('click', e => { if (e.target === el) ssClose(); });
+            $('ssX').onclick = ssClose;
+        }
+        el._urls = files.map(f => URL.createObjectURL(f));
+        el.querySelector('.ss-h').textContent = files.length > 1 ? `저장 준비 완료 · ${files.length}장` : '저장 준비 완료';
+        el.querySelector('.ss-imgs').innerHTML = el._urls.map((u, i) => `<img src="${u}" alt="${files[i].name}">`).join('');
+        $('ssGo').onclick = async () => {
+            files.forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.download = f.name; a.href = el._urls[i]; document.body.appendChild(a); a.click(); a.remove(); }, i * 350));
+        };
+        el.classList.add('on');
+    }
+    function ssClose() { const el = $('saveSheet'); if (!el) return; el.classList.remove('on'); setTimeout(() => { (el._urls || []).forEach(u => URL.revokeObjectURL(u)); el._urls = []; el.querySelector('.ss-imgs').innerHTML = ''; }, 400); }
+    async function saveFiles(files) { files.forEach((f, i) => setTimeout(() => dlBlob(f, f.name), i * 400)); }
+    async function colExport() {
+        const s = colState; if (!s.images.length) return;
+        const saved = s.activeIdx; s.activeIdx = -1;
+        try {
+            const L = colDraw({ cv: colCanvas, measure: true });
+            const k = Math.min(1, CV_MAXD / L.W);
+            const cuts = colCuts(L, k), files = [];
+            if (cuts.length > 1) toast(`길어서 ${cuts.length}장으로 나눠 저장해요`);
+            const off = document.createElement('canvas');
+            for (let i = 0; i < cuts.length; i++) {
+                const [y0, y1] = cuts[i];
+                colDraw({ cv: off, k, y0, h: y1 - y0 });
+                const b = await canvasBlob(off);
+                if (!b) { toast('이미지가 너무 커서 만들 수 없어요'); return; }
+                files.push(new File([b], cuts.length > 1 ? `ARCH_COLLAGE_${i + 1}.png` : 'ARCH_COLLAGE.png', { type: 'image/png' }));
+            }
+            off.width = off.height = 1;
+            if (k < 1) toast('가로가 너무 커서 크기를 줄여 저장했어요');
+            await saveFiles(files);
+        } finally { s.activeIdx = saved; colDraw(); }
+    }
     // ══════════════════════════════════
     //  Mode switch
     // ══════════════════════════════════
@@ -1483,13 +1545,15 @@
         $('ciOX').value = item.ox; $('ciOY').value = item.oy;
     }
 
-    function colDraw() {
+    function colDraw(opt) {
+        if (!(opt && opt.cv)) opt = null;
+        const cv = opt ? opt.cv : colCanvas, ctx = cv.getContext('2d');
         const s = colState;
         if (!s.images.length) {
-            colCanvas.width = 1920; colCanvas.height = 1080;
-            colCtx.fillStyle = '#E8EDF2'; colCtx.fillRect(0, 0, 1920, 1080);
-            colCtx.fillStyle = '#8A96A4'; colCtx.font = '24px Pretendard'; colCtx.textAlign = 'center';
-            colCtx.fillText('이미지를 추가하세요', 960, 540);
+            cv.width = 1920; cv.height = 1080;
+            ctx.fillStyle = '#E8EDF2'; ctx.fillRect(0, 0, 1920, 1080);
+            ctx.fillStyle = '#8A96A4'; ctx.font = '24px Pretendard'; ctx.textAlign = 'center';
+            ctx.fillText('이미지를 추가하세요', 960, 540);
             return;
         }
         const outW = s.outW, gap = s.gap, isV = s.dir === 'v', isGrid = s.dir === 'grid', isGridFit = s.dir === 'gridfit';
@@ -1520,23 +1584,26 @@
             s.images.forEach((item, i) => { const slotW = Math.round(rowH * aspects[i]); slots.push({ x: cx, y: 0, w: slotW, h: rowH, item, fit: false }); cx += slotW + gap; });
             totalW = cx - (s.images.length > 0 ? gap : 0);
         }
-        colCanvas.width = totalW; colCanvas.height = totalH;
-        colCtx.fillStyle = s.gapColor; colCtx.fillRect(0, 0, totalW, totalH);
+        if (opt && opt.measure) return { W: totalW, H: totalH, slots };
+        const k = opt ? opt.k : colPrevK(totalW, totalH), y0 = opt ? opt.y0 : 0, hh = opt ? opt.h : totalH;
+        cv.width = Math.max(1, Math.round(totalW * k)); cv.height = Math.max(1, Math.round(hh * k));
+        ctx.setTransform(k, 0, 0, k, 0, -y0 * k);
+        ctx.fillStyle = s.gapColor; ctx.fillRect(0, 0, totalW, totalH);
         slots.forEach((sl, i) => {
             const item = sl.item;
-            colCtx.save(); colCtx.beginPath(); colCtx.rect(sl.x, sl.y, sl.w, sl.h); colCtx.clip();
-            colCtx.translate(sl.x + sl.w / 2 + item.ox, sl.y + sl.h / 2 + item.oy);
-            colCtx.rotate(item.rotate * Math.PI / 180);
+            ctx.save(); ctx.beginPath(); ctx.rect(sl.x, sl.y, sl.w, sl.h); ctx.clip();
+            ctx.translate(sl.x + sl.w / 2 + item.ox, sl.y + sl.h / 2 + item.oy);
+            ctx.rotate(item.rotate * Math.PI / 180);
             const fitMode = sl.fit ? Math.min(sl.w / item.img.width, sl.h / item.img.height) : Math.max(sl.w / item.img.width, sl.h / item.img.height);
-            colCtx.scale(fitMode * item.scale, fitMode * item.scale);
-            colCtx.drawImage(item.img, -item.img.width / 2, -item.img.height / 2);
-            colCtx.restore();
-            if (i === s.activeIdx) { colCtx.save(); colCtx.strokeStyle = '#C4A87C'; colCtx.lineWidth = 3; colCtx.setLineDash([8, 4]); colCtx.strokeRect(sl.x + 2, sl.y + 2, sl.w - 4, sl.h - 4); colCtx.restore(); }
+            ctx.scale(fitMode * item.scale, fitMode * item.scale);
+            ctx.drawImage(item.img, -item.img.width / 2, -item.img.height / 2);
+            ctx.restore();
+            if (i === s.activeIdx) { ctx.save(); ctx.strokeStyle = '#C4A87C'; ctx.lineWidth = 3; ctx.setLineDash([8, 4]); ctx.strokeRect(sl.x + 2, sl.y + 2, sl.w - 4, sl.h - 4); ctx.restore(); }
         });
         if (s.filter !== 'none' && s.filter !== 'grain') {
             const strength = s.filterStr;
             if (strength > 0) {
-                const imgData = colCtx.getImageData(0, 0, totalW, totalH), px = imgData.data;
+                const imgData = ctx.getImageData(0, 0, cv.width, cv.height), px = imgData.data;
                 for (let i = 0; i < px.length; i += 4) {
                     const r = px[i], g = px[i + 1], b = px[i + 2]; let nr = r, ng = g, nb = b;
                     switch (s.filter) {
@@ -1549,28 +1616,28 @@
                     }
                     px[i] = Math.round(r + (nr - r) * strength); px[i + 1] = Math.round(g + (ng - g) * strength); px[i + 2] = Math.round(b + (nb - b) * strength);
                 }
-                colCtx.putImageData(imgData, 0, 0);
+                ctx.putImageData(imgData, 0, 0);
             }
         }
-        if (s.filter === 'grain') { colCtx.save(); colCtx.globalAlpha = s.filterStr; colCtx.fillStyle = colCtx.createPattern(noiseC, 'repeat'); colCtx.fillRect(0, 0, totalW, totalH); colCtx.restore(); }
+        if (s.filter === 'grain') { ctx.save(); ctx.globalAlpha = s.filterStr; ctx.fillStyle = ctx.createPattern(noiseC, 'repeat'); ctx.fillRect(0, 0, totalW, totalH); ctx.restore(); }
         if (s.grad !== 'none') {
-            colCtx.save(); let g, c1, c2;
+            ctx.save(); let g, c1, c2;
             if (s.grad === 'custom') { c1 = s.gradC1; c2 = s.gradC2; }
             else if (s.grad.includes('black')) { c1 = 'rgba(0,0,0,1)'; c2 = 'rgba(0,0,0,0)'; }
             else if (s.grad.includes('warm')) { c1 = 'rgba(180,100,30,1)'; c2 = 'rgba(180,100,30,0)'; }
             else { c1 = 'rgba(30,60,180,1)'; c2 = 'rgba(30,60,180,0)'; }
-            if (s.grad.startsWith('bt')) g = colCtx.createLinearGradient(0, totalH, 0, 0);
-            else if (s.grad.startsWith('lr')) g = colCtx.createLinearGradient(0, 0, totalW, 0);
-            else g = colCtx.createLinearGradient(0, 0, 0, totalH);
+            if (s.grad.startsWith('bt')) g = ctx.createLinearGradient(0, totalH, 0, 0);
+            else if (s.grad.startsWith('lr')) g = ctx.createLinearGradient(0, 0, totalW, 0);
+            else g = ctx.createLinearGradient(0, 0, 0, totalH);
             g.addColorStop(0, c1); g.addColorStop(1, c2);
-            colCtx.globalAlpha = s.gradA; colCtx.fillStyle = g; colCtx.fillRect(0, 0, totalW, totalH); colCtx.restore();
+            ctx.globalAlpha = s.gradA; ctx.fillStyle = g; ctx.fillRect(0, 0, totalW, totalH); ctx.restore();
         }
     }
     window.COL = {
         move(dir) { const s = colState, i = s.activeIdx, j = i + dir; if (j < 0 || j >= s.images.length) return; [s.images[i], s.images[j]] = [s.images[j], s.images[i]]; s.activeIdx = j; colRenderList(); colDraw(); saveSoon(); },
         dup() { const s = colState, item = curImg(); if (!item) return; s.images.splice(s.activeIdx + 1, 0, mkColItem({ ...item, key: item.key, name: item.name + ' 복사' })); s.activeIdx++; colRenderList(); colDraw(); saveSoon(); },
         del() { const s = colState; s.images.splice(s.activeIdx, 1); if (s.activeIdx >= s.images.length) s.activeIdx = s.images.length - 1; colRenderList(); colDraw(); saveSoon(); },
-        async exportImg() { if (!colState.images.length) return; const saved = colState.activeIdx; colState.activeIdx = -1; colDraw(); await saveCanvas(colCanvas, 'ARCH_COLLAGE.png'); colState.activeIdx = saved; colDraw(); }
+        async exportImg() { await colExport(); }
     };
 
     // ══════════════════════════════════
